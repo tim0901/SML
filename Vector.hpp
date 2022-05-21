@@ -1,11 +1,22 @@
-#ifndef SML_VECTOR_H
-#define SML_VECTOR_H
+#ifndef SML_VECTOR_HPP
+#define SML_VECTOR_HPP
+
+#ifndef SML_MODULE_VECTOR
 
 #include <array>
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
-template<typename T, size_t elements>
+#ifndef sml_export
+#define sml_export
+#endif // !sml_export
+
+#endif // !SML_MODULE_VECTOR
+
+namespace sml {
+
+sml_export template<typename T, size_t elements>
 class Vector {
 public:
 	Vector() { }
@@ -119,7 +130,7 @@ public:
 };
 
 // Write vector to ostream
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline std::ostream& operator << (std::ostream& os, const Vector<T, elements>& v) {
 	for (size_t i = 0; i < elements; i++) {
 		os << v[i];
@@ -130,28 +141,28 @@ inline std::ostream& operator << (std::ostream& os, const Vector<T, elements>& v
 }
 
 // Vector addition
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator += (const Vector<T, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		data[i] += v2[i];
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator + (Vector<T, elements> v1, const Vector<T, elements>& v2) {
 	v1 += v2;
 	return v1;
 }
 
 // For allowing the use of mixed-precision vectors
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<double, elements> operator + (Vector<double, elements> v1, const Vector<float, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] += (double)(v2[i]);
 	}
 	return v1;
 }
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<float, elements> operator + (Vector<float, elements> v1, const Vector<double, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] += (float)(v2[i]);
@@ -160,47 +171,47 @@ inline Vector<float, elements> operator + (Vector<float, elements> v1, const Vec
 }
 
 // Scalar addition
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator += (const double& t) {
 	for (size_t i = 0; i < elements; i++) {
 		data[i] += (T)t;
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator + (Vector<T, elements> v1, const double& t) {
 	v1 += (T)t;
 	return v1;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator + (const double& t, Vector<T, elements> v1) {
 	v1 += (T)t;
 	return v1;
 }
 
 // Vector subtraction
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator -= (const Vector<T, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		data[i] -= v2[i];
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator - (Vector<T, elements> v1, const Vector<T, elements>& v2) {
 	v1 -= v2;
 	return v1;
 }
 
 // For allowing the use of mixed-precision vectors
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<double, elements> operator - (Vector<double, elements> v1, const Vector<float, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] -= (double)(v2[i]);
 	}
 	return v1;
 }
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<float, elements> operator - (Vector<float, elements> v1, const Vector<double, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] -= (float)(v2[i]);
@@ -209,46 +220,46 @@ inline Vector<float, elements> operator - (Vector<float, elements> v1, const Vec
 }
 
 // Scalar subtraction
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator -= (const double& t) {
 	for (size_t i = 0; i < elements; i++) {
 		data[i] -= (T)t;
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator - (Vector<T, elements> v1, const double& t) {
 	v1 -= (T)t;
 	return v1;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator - (const double& t, Vector<T, elements> v1) {
 	v1 -= (T)t;
 	return v1;
 }
 
 // Vector multiplication
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator *= (const Vector<T, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		data[i] *= v2[i];
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator * (Vector<T, elements> v1, const Vector<T, elements>& v2) {
 	v1 *= v2;
 	return v1;
 }
 // For allowing the use of mixed-precision vectors
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<double, elements> operator * (Vector<double, elements> v1, const Vector<float, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] *= (double)(v2[i]);
 	}
 	return v1;
 }
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<float, elements> operator * (Vector<float, elements> v1, const Vector<double, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] *= (float)(v2[i]);
@@ -257,47 +268,47 @@ inline Vector<float, elements> operator * (Vector<float, elements> v1, const Vec
 }
 
 // Scalar multiplication
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator *= (const double& t) {
 	for (size_t i = 0; i < elements; i++) {
 		data[i] *= (T)t;
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator * (Vector<T, elements> v1, const double& t) {
 	v1 *= (T)t;
 	return v1;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator * (const double& t, Vector<T, elements> v1) {
 	v1 *= (T)t;
 	return v1;
 }
 
 // Vector division
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator /= (const Vector<T, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		data[i] /= v2[i];
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator / (Vector<T, elements> v1, const Vector<T, elements>& v2) {
 	v1 /= v2;
 	return v1;
 }
 
 // For allowing the use of mixed-precision vectors
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<double, elements> operator / (Vector<double, elements> v1, const Vector<float, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] /= (double)(v2[i]);
 	}
 	return v1;
 }
-template<size_t elements>
+sml_export template<size_t elements>
 inline Vector<float, elements> operator / (Vector<float, elements> v1, const Vector<double, elements>& v2) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] /= (float)(v2[i]);
@@ -306,7 +317,7 @@ inline Vector<float, elements> operator / (Vector<float, elements> v1, const Vec
 }
 
 // Scalar division
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements>& Vector<T, elements>::operator /= (const double& t) {
 	double inverse = 1.0 / (T)t;
 	for (size_t i = 0; i < elements; i++) {
@@ -314,12 +325,12 @@ inline Vector<T, elements>& Vector<T, elements>::operator /= (const double& t) {
 	}
 	return *this;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator / (Vector<T, elements> v1, const double& t) {
 	v1 /= (T)t;
 	return v1;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 inline Vector<T, elements> operator / (const double& t, Vector<T, elements> v1) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] = (T)t / v1[i];
@@ -328,8 +339,8 @@ inline Vector<T, elements> operator / (const double& t, Vector<T, elements> v1) 
 }
 
 // Perform the dot product on two equal-length vectors
-template<typename T, size_t elements>
-double dot(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
+sml_export template<typename T, size_t elements>
+double constexpr dot(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
 	double ret = 0.0;
 	for (int i = 0; i < elements; i++) {
 		ret += v1[i] * v2[i];
@@ -338,13 +349,13 @@ double dot(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
 }
 
 // Calculate the length of the vector
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 double length(const Vector<T, elements>& v) {
 	return sqrt(squared_length(v));
 }
 
 // Calculate the square of the length of the vector
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 double squared_length(const Vector<T, elements>& v) {
 	double ret = 0.0;
 	for (auto i : v) {
@@ -354,26 +365,26 @@ double squared_length(const Vector<T, elements>& v) {
 }
 
 // Normalise the vector
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 Vector<T, elements> unit_vector(const Vector<T, elements>& v) {
 	return v / length(v);
 }
 
 // Calculate the cross product of two 3-vectors
 // The cross product only exists in 3 and 7 dimensions
-template<typename T>
-Vector<T, 3> cross_product(const Vector<T, 3>& v1, const Vector<T, 3>& v2) {
+sml_export template<typename T>
+Vector<T, 3> constexpr cross_product(const Vector<T, 3>& v1, const Vector<T, 3>& v2) {
 	return Vector<T, 3>((v1[1] * v2[2] - v1[2] * v2[1]), (v1[2] * v2[0] - v1[0] * v2[2]), (v1[0] * v2[1] - v1[1] * v2[0]));
 }
 
 using std::abs;
-template<typename T>
+sml_export template<typename T>
 Vector<T, 3> abs(const Vector<T, 3>& v) {
 	return Vector<T, 3>(abs(v[0]), abs(v[1]), abs(v[2]));
 }
 
 // Return the index containing the largest value
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 int max_element(const Vector<T, elements>& v) {
 	int maxI = 0;
 	for (int i = 1; i < elements; i++) {
@@ -384,7 +395,7 @@ int max_element(const Vector<T, elements>& v) {
 }
 
 // Return the index containing the smallest value
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 int min_element(const Vector<T, elements>& v) {
 	int minI = 0;
 	for (int i = 0; i < elements; i++) {
@@ -396,7 +407,7 @@ int min_element(const Vector<T, elements>& v) {
 
 using std::min;
 // Given two equal-length vectors, return a vector containing the smallest value for each dimension, 
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 Vector<T, elements> min(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
 	Vector<T, elements> ret;
 	for (size_t i = 0; i < elements; i++) {
@@ -405,20 +416,20 @@ Vector<T, elements> min(const Vector<T, elements>& v1, const Vector<T, elements>
 	return ret;
 }
 // Given two 2-vectors, return a 2-vector containing the smallest value for each dimension
-template<typename T>
+sml_export template<typename T>
 Vector<T, 2> min(const Vector<T, 2>& v1, const Vector<T, 2>& v2) {
 	return Vector<T, 2>(v1[0] < v2[0] ? v1[0] : v2[0],
 						v1[1] < v2[1] ? v1[1] : v2[1]);
 }
 // Given two 3-vectors, return a 3-vector containing the smallest value for each dimension
-template<typename T>
+sml_export template<typename T>
 Vector<T, 3> min(const Vector<T, 3>& v1, const Vector<T, 3>& v2) {
 	return Vector<T, 3>(v1[0] < v2[0] ? v1[0] : v2[0],
 						v1[1] < v2[1] ? v1[1] : v2[1],
 						v1[2] < v2[2] ? v1[2] : v2[2]);
 }
 // Given two 4-vectors, return a 4-vector containing the smallest value for each dimension
-template<typename T>
+sml_export template<typename T>
 Vector<T, 4> min(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
 	return Vector<T, 4>(v1[0] < v2[0] ? v1[0] : v2[0],
 						v1[1] < v2[1] ? v1[1] : v2[1],
@@ -428,7 +439,7 @@ Vector<T, 4> min(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
 
 using std::max;
 // Given two equal-length vectors, return a vector containing the largest value for each dimension, 
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 Vector<T, elements> max(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
 	Vector<T, elements> ret;
 	for (size_t i = 0; i < elements; i++) {
@@ -437,20 +448,20 @@ Vector<T, elements> max(const Vector<T, elements>& v1, const Vector<T, elements>
 	return ret;
 }
 // Given two 2-vectors, return a 2-vector containing the largest value for each dimension
-template<typename T>
+sml_export template<typename T>
 Vector<T, 2> max(const Vector<T, 2>& v1, const Vector<T, 2>& v2) {
 	return Vector<T, 2>(v1[0] > v2[0] ? v1[0] : v2[0],
 						v1[1] > v2[1] ? v1[1] : v2[1]);
 }
 // Given two 3-vectors, return a 3-vector containing the largest value for each dimension
-template<typename T>
+sml_export template<typename T>
 Vector<T, 3> max(const Vector<T, 3>& v1, const Vector<T, 3>& v2) {
 	return Vector<T, 3>(v1[0] > v2[0] ? v1[0] : v2[0],
 						v1[1] > v2[1] ? v1[1] : v2[1],
 						v1[2] > v2[2] ? v1[2] : v2[2]);
 }
 // Given two 4-vectors, return a 4-vector containing the smallest value for each dimension
-template<typename T>
+sml_export template<typename T>
 Vector<T, 4> max(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
 	return Vector<T, 4>(v1[0] > v2[0] ? v1[0] : v2[0],
 						v1[1] > v2[1] ? v1[1] : v2[1],
@@ -459,7 +470,7 @@ Vector<T, 4> max(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
 }
 
 // Reorder vector indices as desired
-template<typename T, size_t elements, typename ...Ts>
+sml_export template<typename T, size_t elements, typename ...Ts>
 Vector<T, elements> permute(const Vector<T, elements>& v, Ts ...ts) {
 	Vector<T, elements> ret;
 	std::vector<size_t>indices({ static_cast<size_t>(ts)... });
@@ -469,7 +480,7 @@ Vector<T, elements> permute(const Vector<T, elements>& v, Ts ...ts) {
 	indices.clear();
 	return ret;
 }
-template<typename T, size_t elements>
+sml_export template<typename T, size_t elements>
 Vector<T, elements> permute(const Vector<T, elements>& v, const Vector<size_t, elements> indices){
 	Vector<T, elements> ret;
 	for(size_t i = 0; i < indices.size(); i++){
@@ -477,15 +488,15 @@ Vector<T, elements> permute(const Vector<T, elements>& v, const Vector<size_t, e
 	}
 	return ret;
 }
-template<typename T>
+sml_export template<typename T>
 Vector<T, 2> permute(const Vector<T, 2>& v, size_t x, size_t y) {
 	return Vector<T, 2>(v[x], v[y]);
 }
-template<typename T>
+sml_export template<typename T>
 Vector<T, 3> permute(const Vector<T, 3>& v, size_t x, size_t y, size_t z) {
 	return Vector<T, 3>(v[x], v[y], v[z]);
 }
-template<typename T>
+sml_export template<typename T>
 Vector<T, 4> permute(const Vector<T, 4>& v, size_t x, size_t y, size_t z, size_t w) {
 	return Vector<T, 4>(v[x], v[y], v[z], v[w]);
 }
@@ -501,4 +512,5 @@ using Vec2i = Vector<int, 2>;
 using Vec3i = Vector<int, 3>;
 using Vec4i = Vector<int, 4>;
 
-#endif // !SML_VECTOR_H
+} //!namespace sml
+#endif // !SML_VECTOR_HPP
