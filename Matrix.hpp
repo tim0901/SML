@@ -745,33 +745,33 @@ sml_export inline Matrix<float, 4, 4> RotateZ(const float radians) {
 }
 
 // Shorthand definitions
-sml_export using Matrix22d = Matrix<double, 2, 2>;
-sml_export using Matrix23d = Matrix<double, 2, 3>;
-sml_export using Matrix24d = Matrix<double, 2, 4>;
-sml_export using Matrix32d = Matrix<double, 3, 2>;
-sml_export using Matrix33d = Matrix<double, 3, 3>;
-sml_export using Matrix34d = Matrix<double, 3, 4>;
-sml_export using Matrix42d = Matrix<double, 4, 2>;
-sml_export using Matrix43d = Matrix<double, 4, 3>;
-sml_export using Matrix44d = Matrix<double, 4, 4>;
-sml_export using Matrix22f = Matrix<float, 2, 2>;
-sml_export using Matrix23f = Matrix<float, 2, 3>;
-sml_export using Matrix24f = Matrix<float, 2, 4>;
-sml_export using Matrix32f = Matrix<float, 3, 2>;
-sml_export using Matrix33f = Matrix<float, 3, 3>;
-sml_export using Matrix34f = Matrix<float, 3, 4>;
-sml_export using Matrix42f = Matrix<float, 4, 2>;
-sml_export using Matrix43f = Matrix<float, 4, 3>;
-sml_export using Matrix44f = Matrix<float, 4, 4>;
-sml_export using Matrix22i = Matrix<int, 2, 2>;
-sml_export using Matrix23i = Matrix<int, 2, 3>;
-sml_export using Matrix24i = Matrix<int, 2, 4>;
-sml_export using Matrix32i = Matrix<int, 3, 2>;
-sml_export using Matrix33i = Matrix<int, 3, 3>;
-sml_export using Matrix34i = Matrix<int, 3, 4>;
-sml_export using Matrix42i = Matrix<int, 4, 2>;
-sml_export using Matrix43i = Matrix<int, 4, 3>;
-sml_export using Matrix44i = Matrix<int, 4, 4>;
+sml_export using Mat22d = Matrix<double, 2, 2>;
+sml_export using Mat23d = Matrix<double, 2, 3>;
+sml_export using Mat24d = Matrix<double, 2, 4>;
+sml_export using Mat32d = Matrix<double, 3, 2>;
+sml_export using Mat33d = Matrix<double, 3, 3>;
+sml_export using Mat34d = Matrix<double, 3, 4>;
+sml_export using Mat42d = Matrix<double, 4, 2>;
+sml_export using Mat43d = Matrix<double, 4, 3>;
+sml_export using Mat44d = Matrix<double, 4, 4>;
+sml_export using Mat22f = Matrix<float, 2, 2>;
+sml_export using Mat23f = Matrix<float, 2, 3>;
+sml_export using Mat24f = Matrix<float, 2, 4>;
+sml_export using Mat32f = Matrix<float, 3, 2>;
+sml_export using Mat33f = Matrix<float, 3, 3>;
+sml_export using Mat34f = Matrix<float, 3, 4>;
+sml_export using Mat42f = Matrix<float, 4, 2>;
+sml_export using Mat43f = Matrix<float, 4, 3>;
+sml_export using Mat44f = Matrix<float, 4, 4>;
+sml_export using Mat22i = Matrix<int, 2, 2>;
+sml_export using Mat23i = Matrix<int, 2, 3>;
+sml_export using Mat24i = Matrix<int, 2, 4>;
+sml_export using Mat32i = Matrix<int, 3, 2>;
+sml_export using Mat33i = Matrix<int, 3, 3>;
+sml_export using Mat34i = Matrix<int, 3, 4>;
+sml_export using Mat42i = Matrix<int, 4, 2>;
+sml_export using Mat43i = Matrix<int, 4, 3>;
+sml_export using Mat44i = Matrix<int, 4, 4>;
 
 }// !namespace sml
 #endif // !SML_MATRIX_HPP
