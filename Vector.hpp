@@ -459,19 +459,36 @@ Vector<T, 4> max(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
 }
 
 // Reorder vector indices as desired
+template<typename T, size_t elements, typename ...Ts>
+Vector<T, elements> permute(const Vector<T, elements>& v, Ts ...ts) {
+	Vector<T, elements> ret;
+	std::vector<size_t>indices({ static_cast<size_t>(ts)... });
+	for (size_t i = 0; i < indices.size(); i++) {
+		ret[i] = v[indices[i]];
+	}
+	indices.clear();
+	return ret;
+}
+template<typename T, size_t elements>
+Vector<T, elements> permute(const Vector<T, elements>& v, const Vector<size_t, elements> indices){
+	Vector<T, elements> ret;
+	for(size_t i = 0; i < indices.size(); i++){
+		ret[i] = v[indices[i]];
+	}
+	return ret;
+}
 template<typename T>
-Vector<T, 2> permute(const Vector<T, 2>& v, int x, int y) {
+Vector<T, 2> permute(const Vector<T, 2>& v, size_t x, size_t y) {
 	return Vector<T, 2>(v[x], v[y]);
 }
 template<typename T>
-Vector<T, 3> permute(const Vector<T, 3>& v, int x, int y, int z) {
+Vector<T, 3> permute(const Vector<T, 3>& v, size_t x, size_t y, size_t z) {
 	return Vector<T, 3>(v[x], v[y], v[z]);
 }
 template<typename T>
-Vector<T, 4> permute(const Vector<T, 4>& v, int x, int y, int z, int w) {
+Vector<T, 4> permute(const Vector<T, 4>& v, size_t x, size_t y, size_t z, size_t w) {
 	return Vector<T, 4>(v[x], v[y], v[z], v[w]);
 }
-// TODO: permute vector indices for vectors of arbitrary length
 
 // Shorthand definitions
 using Vec2d = Vector<double, 2>;
