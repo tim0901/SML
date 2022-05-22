@@ -18,46 +18,59 @@
 namespace sml {
 
 // This class uses row-major memory ordering
-sml_export template<class T, size_t nrows, size_t ncols>
+sml_export template<typename T, size_t nrows, size_t ncols>
 class Matrix {
 public:
-	Matrix() : data(std::vector<T>(nrows* ncols)) {}
-	Matrix(const Matrix& m) : data(m.data) {}
-	Matrix(std::vector<T> values) : data(values) {}
-	Matrix(T i) : data(std::vector<T>(nrows* ncols, i)) {}
-	Matrix(T arr[nrows][ncols]) : data(std::vector<T>(nrows* ncols)) {
-		for (int i = 0; i < nrows; i++) {
-			for (int j = 0; j < ncols; j++) {
-				data.at((i * ncols) + j) = arr[i][j];
+	Matrix() {};
+	template<typename T2>
+	Matrix(T2 t) {
+		for (size_t i = 0; i < nrows*ncols; i++) {
+			data[i] = static_cast<T>(t);
+		}
+	}
+	template<typename ... T2>
+	Matrix(T2 ...ts) : data{ static_cast<T>(ts)... } {}
+	template<typename T2>
+	Matrix(const Matrix<T2, nrows, ncols>& m2) {
+		std::transform(m2.begin(), m2.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
+	}
+	template<typename T2>
+	Matrix(const T2 arr[nrows][ncols]) {
+		for (size_t i = 0; i < nrows; i++) {
+			for (size_t j = 0; j < ncols; j++) {
+				data.at((i * ncols) + j) = static_cast<T>(arr[i][j]);
 			}
 		}
 	}
-	Matrix(T arr[nrows * ncols]) : data(std::vector<T>(nrows* ncols)) {
-		for (int i = 0; i < nrows; i++) {
-			for (int j = 0; j < ncols; j++) {
-				data.at((i * ncols) + j) = arr[(i * ncols) + j];
+	template<typename T2>
+	Matrix(const T2 arr[nrows * ncols]) {
+		for (size_t i = 0; i < nrows; i++) {
+			for (size_t j = 0; j < ncols; j++) {
+				data.at((i * ncols) + j) = static_cast<T>(arr[(i * ncols) + j]);
 			}
 		}
 	}
-
-	// TODO: construct from sub-matrices (row/column vectors, squares eg pauli matrices)#
-
-	// Operators
+	template<typename T2>
+	Matrix(const std::array<T2, nrows* ncols> arr) {
+		std::transform(arr.begin(), arr.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
+	}
+	
+	// TODO: Construct from sub-matricecs (rows/column vectors, squares eg. Pauli matrices)
 
 	// Access elements with M[row][column]
-	inline std::vector<T>::iterator operator [] (int i) { return data.begin() + (i * ncols); }
-	inline std::vector<T>::const_iterator operator [] (int i) const { return data.begin() + (i * ncols); }
+	inline std::array<T, nrows * ncols>::iterator operator [] (int i) { return data.begin() + (i * ncols); }
+	inline std::array<T, nrows* ncols>::const_iterator operator [] (int i) const { return data.begin() + (i * ncols); }
 	// (This class uses row-major memory ordering)
 
-	inline const Matrix& operator + () const { return *this; }
-	inline Matrix operator - () const { std::vector<T> ret = this->data; std::transform(ret.begin(), ret.end(), ret.begin(), [](T c) -> T {return -c; }); return Matrix(ret); }
-
-	// Access elements with m.at(row, column) 
-	inline T& at(int r, int c) { return data.at((r * ncols) + c); }
+	// Access elements with m.at(i)
+	inline T at(int i) const { return data.at(i); }
+	inline T& at(int i) { return data.at(i); }
+	// Access elements with m.at(row, column)
 	inline T at(int r, int c) const { return data.at((r * ncols) + c); }
+	inline T& at(int r, int c) { return data.at((r * ncols) + c); }
 
-	// Fetch an individual row as a matrix of its own
-	inline Matrix<T, 1, ncols> row(int r) const {
+	// Fetch an individual row as a Matrix
+	inline Matrix<T, 1, ncols> row_matrix(int r) const {
 		Matrix<T, 1, ncols> ret;
 		for (size_t i = 0; i < ncols; i++) {
 			ret[0][i] = data[(r * ncols) + i];
@@ -65,8 +78,8 @@ public:
 		return ret;
 	}
 
-	// Fetch an individual riw as a vector
-	inline Vector<T, ncols> rowVector(int r) const {
+	// Fetch an individual row as a Vector
+	inline Vector<T, ncols> row_vector(int r) const {
 		Vector<T, ncols> ret;
 		for (size_t i = 0; i < ncols; i++) {
 			ret[i] = data[(r * ncols) + i];
@@ -74,8 +87,8 @@ public:
 		return ret;
 	}
 
-	// Fetch an individual column as a matrix of its own
-	inline Matrix<T, nrows, 1> col(int c) const {
+	// Fetch an individual column as a Matrix
+	inline Matrix<T, nrows, 1> col_matrix(int c) const {
 		Matrix<T, nrows, 1> ret;
 		for (size_t i = 0; i < nrows; i++) {
 			ret[i][0] = data[(i * ncols) + c];
@@ -83,8 +96,8 @@ public:
 		return ret;
 	}
 
-	// Fetch an individual column as a vector
-	inline Vector<T, nrows> colVector(int c) const {
+	// Fetch an individual column as a Vector
+	inline Vector<T, nrows> col_vector(int c) const {
 		Vector<T, nrows> ret;
 		for (size_t i = 0; i < nrows; i++) {
 			ret[i] = data[(i * ncols) + c];
@@ -92,62 +105,125 @@ public:
 		return ret;
 	}
 
+	// Operators
 
-
-	// Addition
-	inline Matrix<T, nrows, ncols>& operator += (const Matrix<T, nrows, ncols>& m2);
-	template<size_t rows2, size_t cols2>
-	inline Matrix<T, nrows, ncols>& operator += (const Matrix<T, rows2, cols2>& m2);
-	inline Matrix<T, nrows, ncols>& operator += (const double t);
-
-	// Subtraction
-	inline Matrix<T, nrows, ncols>& operator -= (const Matrix<T, nrows, ncols>& m2);
-	template<size_t rows2, size_t cols2>
-	inline Matrix<T, nrows, ncols>& operator -= (const Matrix<T, rows2, cols2>& m2);
-	inline Matrix<T, nrows, ncols>& operator -= (const double t);
-
-	// Multiplication
-	inline Matrix& operator *= (const double t);
-
-	// Division
-	inline Matrix& operator /= (const double t);
-
-	inline bool operator == (const Matrix<T, nrows, ncols>& m2) { 
-		if (data == m2.data)
-			return true;
-		else
-			return false;
+	inline const Matrix& operator + () const { return *this; }
+	inline Matrix operator - () const {
+		Matrix<T, nrows, ncols> ret = *this;
+		std::transform(ret.begin(), ret.end(), ret.begin(), [](T t)->T {return -t; });
+		return ret;
 	}
 
-	// C++ Container named requirements
-	inline constexpr std::vector<T>::iterator begin() noexcept { return data.begin(); }
-	inline constexpr std::vector<T>::const_iterator begin() const noexcept { return data.begin(); }
-	inline constexpr std::vector<T>::iterator end() noexcept { return data.end(); }
-	inline constexpr std::vector<T>::const_iterator end() const noexcept { return data.end(); }
-	inline constexpr std::vector<T>::const_iterator cbegin() const noexcept { return data.cbegin(); }
-	inline constexpr std::vector<T>::const_iterator cend() const noexcept { return data.cend(); }
+	inline bool operator == (const Matrix<T, nrows, ncols>& m2) {
+		return std::equal(data.begin(), data.end(), m2.begin(), m2.end());
+	}
+	inline bool operator != (const Matrix<T, nrows, ncols>& m2) {
+		return !(*this == m2);
+	}
 
-	inline constexpr std::vector<T>::size_type size() const noexcept { return data.size(); }
-	inline constexpr std::vector<T>::size_type max_size() const noexcept { return data.max_size(); }
+	// Addition
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator += (const Matrix<T2, nrows, ncols>& m2);
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator += (const T2& t);
+
+	// Subtraction
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator -= (const Matrix<T2, nrows, ncols>& m2);
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator -= (const T2& t);
+
+	// Matrix product
+	template<typename T2, size_t ncols2>
+	inline Matrix<T, nrows, ncols>& operator *= (const Matrix<T2, ncols, ncols2>& m2);
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator *= (const T2& t);
+	
+	// Division
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator /= (const T2& t);
+
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator = (const Matrix<T2, nrows, ncols>& m2) {
+		std::transform(m2.begin(), m2.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
+		return *this;
+	}
+
+	// Add a row to each row of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& add_row(const Matrix<T2, 1, ncols>& m2);
+	// Subtract a row from each row of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& sub_row(const Matrix<T2, 1, ncols>& m2);
+	// Multiply each row of a Matrix with a row
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& mul_row(const Matrix<T2, 1, ncols>& m2);
+	// Divide a each row of a Matrix by a row
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& div_row(const Matrix<T2, 1, ncols>& m2);
+
+	// Add a column to each column of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& add_col(const Matrix<T2, nrows, 1>& m2);
+	// Subtract a column from each column of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& sub_col(const Matrix<T2, nrows, 1>& m2);
+	// Multiply each column of a Matrix with a column
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& mul_col(const Matrix<T2, nrows, 1>& m2);
+	// Divide a each column of a Matrix by a column
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& div_col(const Matrix<T2, nrows, 1>& m2);
+
+	// Add a Vector to each row of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& add_row(const Vector<T2, ncols>& v);
+	// Subtract a Vector from each row of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& sub_row(const Vector<T2, ncols>& v);
+	// Multiply each row of a Matrix with a Vector
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& mul_row(const Vector<T2, ncols>& v);
+	// Divide a each row of a Matrix by a Vector
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& div_row(const Vector<T2, ncols>& v);
+
+	// Add a Vector to each column of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& add_col(const Vector<T2, nrows>& v);
+	// Subtract a Vector from each column of a Matrix
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& sub_col(const Vector<T2, nrows>& v);
+	// Multiply each column of a Matrix with a Vector
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& mul_col(const Vector<T2, nrows>& v);
+	// Divide a each column of a Matrix by a Vector
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& div_col(const Vector<T2, nrows>& v);
+
+	// C++ container named requirements
+	inline constexpr std::array<T, nrows * ncols>::iterator begin() noexcept { return data.begin(); }
+	inline constexpr std::array<T, nrows * ncols>::const_iterator begin() const noexcept { return data.begin(); }
+	inline constexpr std::array<T, nrows * ncols>::const_iterator cbegin() const noexcept { return data.cbegin(); }
+	inline constexpr std::array<T, nrows * ncols>::iterator end() noexcept { return data.end(); }
+	inline constexpr std::array<T, nrows * ncols>::const_iterator end() const noexcept { return data.end(); }
+	inline constexpr std::array<T, nrows * ncols>::const_iterator cend() const noexcept { return data.cend(); }
+
+	inline constexpr std::array<T, nrows * ncols>::size_type size() const noexcept { return data.size(); }
+	inline constexpr std::array<T, nrows * ncols>::size_type max_size() const noexcept { return data.max_size(); }
 	inline constexpr bool empty() const noexcept { return data.empty(); }
 
 	inline constexpr size_t rows() const { return nrows; }
 	inline constexpr size_t cols() const { return ncols; }
-	std::vector<T> data;
+	std::array<T, nrows * ncols> data = {};
 };
-
-// TODO: Minor submatrix
-// TODO: Comatrix
-// TODO: Adjugate (transpose of the comatrix)
-// TODO: Cofactor
-// TODO: Append rows/columns? eg 2x1 + 2x1 = 2x2
 
 // Ostream << operator. Allows matrices to be printed to the console using eg cout
 sml_export template<class T, size_t nrows, size_t ncols>
 inline std::ostream& operator << (std::ostream& os, const Matrix<T, nrows, ncols>& m) {
 	// For each column, find the longest element
 
-	std::vector<int> column_widths(ncols);
+	std::vector<size_t> column_widths(ncols);
 	Matrix<std::string, nrows, ncols> stringMatrix;
 
 	// Find the longest element in each column to determine their widths
@@ -180,192 +256,104 @@ inline std::ostream& operator << (std::ostream& os, const Matrix<T, nrows, ncols
 
 			os << stringMatrix[i][j] << " ";
 		}
-		if(i < (nrows -1))
+		if (i < (nrows - 1))
 			os << "\n";
 	}
 
 	return os;
 }
 
-// Matrix addition - requires identical dimensions
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator + (const Matrix<T, nrows, ncols>& m1, const Matrix<T, nrows, ncols>& m2) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), m2.begin(), ret.begin(), [](T i, T j) -> T {return i + j; });	return ret;
-}
-
-// Matrix subtraction - requires identical dimensions
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator - (const Matrix<T, nrows, ncols>& m1, const Matrix<T, nrows, ncols>& m2) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), m2.begin(), ret.begin(), [](T i, T j) -> T {return i - j; });	return ret;
-}
-
-// Elementwise matrix division - requires identical dimensions
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator / (const Matrix<T, nrows, ncols>& m1, const Matrix<T, nrows, ncols>& m2) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), m2.begin(), ret.begin(), [](T i, T j) -> T {return i / j; });	return ret;
-}
-
-// Elementwise scalar addition
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator + (const Matrix<T, nrows, ncols>& m1, const T& t) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), ret.begin(), [t](T i) -> T {return i + t; });	return ret;
-}
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator + (const T& t, const Matrix<T, nrows, ncols>& m1) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), ret.begin(), [t](T i) -> T {return i + t; });	return ret;
-}
-
-// Elementwise scalar subtraction
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator - (const Matrix<T, nrows, ncols>& m1, const T& t) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), ret.begin(), [t](T i) -> T {return i - t; });	return ret;
-}
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator - (const T& t, const Matrix<T, nrows, ncols>& m1) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), ret.begin(), [t](T i) -> T {return i - t; });	return ret;
-}
-
-// Elementwise scalar multiplication
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator * (const Matrix<T, nrows, ncols>& m1, const T& t) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), ret.begin(), [t](T i) -> T {return i * t; });	return ret;
-}
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator * (const T& t, const Matrix<T, nrows, ncols>& m1) {
-	Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), ret.begin(), [t](T i) -> T {return i * t; });	return ret;
-}
-
-// Elementwise scalar division
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols> operator / (const Matrix<T, nrows, ncols>& m1, const T &t) {
-	if (t == 0) throw std::logic_error("Divide by zero"); Matrix<T, nrows, ncols> ret = m1; std::transform(ret.begin(), ret.end(), ret.begin(), [t](T i) -> T {return i / t; });  return ret;
-}
-
-// Matrix += Matrix - identical dimensions
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator+= (const Matrix<T, nrows, ncols>& m2) {
+// Matrix addition
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator += (const Matrix<T2, nrows, ncols>& m2) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
-			data[(i * ncols) + j] += m2.at(i, j);
+			data[(i * ncols) + j] += static_cast<T>(m2.at(i,j));
 		}
 	}
 	return *this;
 }
-
-// Matrix += Matrix - different dimensions
-sml_export template<class T, size_t nrows, size_t ncols>
-template<size_t rows2, size_t cols2>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator += (const Matrix<T, rows2, cols2>& m2) {
-
-	if (rows2 == 1 && ncols == cols2) {
-		// m2 is a compatible row vector
-
-		// Add row vector to each row. 
-		for (int i = 0; i < nrows; i++) {
-			for (int j = 0; j < cols2; j++) {
-				data[(i * cols2) + j] += m2.at(0, j);
-			}
-		}
-	}
-	else if (cols2 == 1 && nrows == rows2) {
-		// m2 is a compatible column vector
-
-		// Add column vector to each column. 
-		for (int i = 0; i < rows2; i++) {
-			for (int j = 0; j < ncols; j++) {
-				data[(i * ncols) + j] += m2.at(i, 0);
-			}
-		}
-	}
-	else {
-		throw std::domain_error("Incompatible matrix dimensions");
-	}
-	return *this;
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator + (Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
+	m1 += m2;
+	return m1;
 }
 
-// Matrix += scalar - add scalar to each element
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator+= (const double t) {
+// Scalar addition
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator += (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
-			data[(i * ncols) + j] += t;
+			data[(i * ncols) + j] += static_cast<T>(t);
 		}
 	}
 	return *this;
 }
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator + (Matrix<T, nrows, ncols> m1, const T2& t) {
+	m1 += t;
+	return m1;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator + (const T2& t, Matrix<T, nrows, ncols> m1) {
+	m1 += t;
+	return m1;
+}
 
-// Matrix -= Matrix - identical dimensions
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator-= (const Matrix<T, nrows, ncols>& m2) {
+// Matrix subtraction
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator -= (const Matrix<T2, nrows, ncols>& m2) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
-			data[(i * ncols) + j] -= m2[i][j];
+			data[(i * ncols) + j] -= static_cast<T>(m2.at(i, j));
 		}
 	}
 	return *this;
 }
-
-// Matrix -= Matrix - different dimensions
-sml_export template<class T, size_t nrows, size_t ncols>
-template<size_t rows2, size_t cols2>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator -= (const Matrix<T, rows2, cols2>& m2) {
-
-	if (rows2 == 1 && ncols == cols2) {
-		// m2 is a compatible row vector
-
-		// Add row vector to each row. 
-		for (int i = 0; i < nrows; i++) {
-			for (int j = 0; j < cols2; j++) {
-				data[(i * cols2) - j] += m2.at(0, j);
-			}
-		}
-	}
-	else if (cols2 == 1 && nrows == rows2) {
-		// m2 is a compatible column vector
-
-		// Add column vector to each column. 
-		for (int i = 0; i < rows2; i++) {
-			for (int j = 0; j < ncols; j++) {
-				data[(i * ncols) - j] += m2.at(i, 0);
-			}
-		}
-	}
-	else {
-		throw std::domain_error("Incompatible matrix dimensions");
-	}
-	return *this;
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator - (Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
+	m1 -= m2;
+	return m1;
 }
 
-// Matrix -= scalar - subtract scalar from each element
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator-= (const double t) {
+// Scalar subtraction
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator -= (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
-			data[(i * ncols) + j] -= t;
+			data[(i * ncols) + j] -= static_cast<T>(t);
 		}
 	}
 	return *this;
 }
-
-// Matrix *= scalar
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator*= (const double t) {
-	for (int i = 0; i < nrows; i++) {
-		for (int j = 0; j < ncols; j++) {
-			data[(i * ncols) + j] *= t;
-		}
-	}
-	return *this;
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator - (Matrix<T, nrows, ncols> m1, const T2& t) {
+	m1 -= t;
+	return m1;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator - (const T2& t, Matrix<T, nrows, ncols> m1) {
+	m1 -= t;
+	return m1;
 }
 
-// Matrix Product
-sml_export template<class T, size_t outside_rows, size_t inside_dim, size_t outside_cols>
-inline Matrix<T, outside_rows, outside_cols> operator * (const Matrix<T, outside_rows, inside_dim>& m1, const Matrix<T, inside_dim, outside_cols>& m2) {
+// Matrix product
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2, size_t ncols2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator *= (const Matrix<T2, ncols, ncols2>& m2) {
+	return (*this) * m2;
+}
+sml_export template<typename T, size_t outside_rows, size_t inside_dim, size_t outside_cols, typename T2>
+inline Matrix<T, outside_rows, outside_cols>& operator * (Matrix<T, outside_rows, inside_dim> m1, const Matrix<T2, inside_dim, outside_cols>& m2) {
 	Matrix<T, outside_rows, outside_cols> ret(0);
 	for (int i = 0; i < outside_rows; i++) {
 		for (int j = 0; j < outside_cols; j++) {
 			for (int k = 0; k < inside_dim; k++) {
-				ret[i][j] += (m1[i][k] * m2[k][j]);
+				ret[i][j] += (m1[i][k] * static_cast<T>(m2[k][j]));
 			}
 		}
 	}
@@ -375,32 +363,40 @@ inline Matrix<T, outside_rows, outside_cols> operator * (const Matrix<T, outside
 // Unrolled for small, common combinations
 sml_export template<class T>
 inline Matrix<T, 2, 2> operator * (const Matrix<T, 2, 2>& m1, const Matrix<T, 2, 2>& m2) {
-	return Matrix<T, 2, 2>({ 
+	return Matrix<T, 2, 2>({
 		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[2], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[3],
-		m1.data[2] * m2.data[0] + m1.data[3] * m2.data[2], m1.data[2] * m2.data[1] + m1.data[3] * m2.data[3]});
+		m1.data[2] * m2.data[0] + m1.data[3] * m2.data[2], m1.data[2] * m2.data[1] + m1.data[3] * m2.data[3] });
 }
 sml_export template<class T>
 inline Matrix<T, 3, 3> operator * (const Matrix<T, 3, 3>& m1, const Matrix<T, 3, 3>& m2) {
 	return Matrix<T, 3, 3>({
 		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[3] + m1.data[2] * m2.data[6], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[7], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[8],
 		m1.data[3] * m2.data[0] + m1.data[4] * m2.data[3] + m1.data[5] * m2.data[6], m1.data[3] * m2.data[1] + m1.data[4] * m2.data[4] + m1.data[5] * m2.data[7], m1.data[3] * m2.data[2] + m1.data[4] * m2.data[5] + m1.data[5] * m2.data[8],
-		m1.data[6] * m2.data[0] + m1.data[7] * m2.data[3] + m1.data[8] * m2.data[6], m1.data[6] * m2.data[1] + m1.data[7] * m2.data[4] + m1.data[8] * m2.data[7], m1.data[6] * m2.data[2] + m1.data[7] * m2.data[5] + m1.data[8] * m2.data[8]});
+		m1.data[6] * m2.data[0] + m1.data[7] * m2.data[3] + m1.data[8] * m2.data[6], m1.data[6] * m2.data[1] + m1.data[7] * m2.data[4] + m1.data[8] * m2.data[7], m1.data[6] * m2.data[2] + m1.data[7] * m2.data[5] + m1.data[8] * m2.data[8] });
 }
 sml_export template<class T>
 inline Matrix<T, 4, 4> operator * (const Matrix<T, 4, 4>& m1, const Matrix<T, 4, 4>& m2) {
 	return Matrix<T, 4, 4>({
-		m1.data[0]  * m2.data[0] + m1.data[1]  * m2.data[4] + m1.data[2]  * m2.data[8] + m1.data[3]  * m2.data[12], m1.data[0]  * m2.data[1] + m1.data[1]  * m2.data[5] + m1.data[2]  * m2.data[9] + m1.data[3]  * m2.data[13], m1.data[0]  * m2.data[2] + m1.data[1]  * m2.data[6] + m1.data[2]  * m2.data[10] + m1.data[3]  * m2.data[14], m1.data[0]  * m2.data[3] + m1.data[1]  * m2.data[7] + m1.data[2]  * m2.data[11] + m1.data[3]  * m2.data[15],
-		m1.data[4]  * m2.data[0] + m1.data[5]  * m2.data[4] + m1.data[6]  * m2.data[8] + m1.data[7]  * m2.data[12], m1.data[4]  * m2.data[1] + m1.data[5]  * m2.data[5] + m1.data[6]  * m2.data[9] + m1.data[7]  * m2.data[13], m1.data[4]  * m2.data[2] + m1.data[5]  * m2.data[6] + m1.data[6]  * m2.data[10] + m1.data[7]  * m2.data[14], m1.data[4]  * m2.data[3] + m1.data[5]  * m2.data[7] + m1.data[6]  * m2.data[11] + m1.data[7]  * m2.data[15],
-		m1.data[8]  * m2.data[0] + m1.data[9]  * m2.data[4] + m1.data[10] * m2.data[8] + m1.data[11] * m2.data[12], m1.data[8]  * m2.data[1] + m1.data[9]  * m2.data[5] + m1.data[10] * m2.data[9] + m1.data[11] * m2.data[13], m1.data[8]  * m2.data[2] + m1.data[9]  * m2.data[6] + m1.data[10] * m2.data[10] + m1.data[11] * m2.data[14], m1.data[8]  * m2.data[3] + m1.data[9]  * m2.data[7] + m1.data[10] * m2.data[11] + m1.data[11] * m2.data[15],
-		m1.data[12] * m2.data[0] + m1.data[13] * m2.data[4] + m1.data[14] * m2.data[8] + m1.data[15] * m2.data[12], m1.data[12] * m2.data[1] + m1.data[13] * m2.data[5] + m1.data[14] * m2.data[9] + m1.data[15] * m2.data[13], m1.data[12] * m2.data[2] + m1.data[13] * m2.data[6] + m1.data[14] * m2.data[10] + m1.data[15] * m2.data[14], m1.data[12] * m2.data[3] + m1.data[13] * m2.data[7] + m1.data[14] * m2.data[11] + m1.data[15] * m2.data[15]});
+		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[8] + m1.data[3] * m2.data[12], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[9] + m1.data[3] * m2.data[13], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[6] + m1.data[2] * m2.data[10] + m1.data[3] * m2.data[14], m1.data[0] * m2.data[3] + m1.data[1] * m2.data[7] + m1.data[2] * m2.data[11] + m1.data[3] * m2.data[15],
+		m1.data[4] * m2.data[0] + m1.data[5] * m2.data[4] + m1.data[6] * m2.data[8] + m1.data[7] * m2.data[12], m1.data[4] * m2.data[1] + m1.data[5] * m2.data[5] + m1.data[6] * m2.data[9] + m1.data[7] * m2.data[13], m1.data[4] * m2.data[2] + m1.data[5] * m2.data[6] + m1.data[6] * m2.data[10] + m1.data[7] * m2.data[14], m1.data[4] * m2.data[3] + m1.data[5] * m2.data[7] + m1.data[6] * m2.data[11] + m1.data[7] * m2.data[15],
+		m1.data[8] * m2.data[0] + m1.data[9] * m2.data[4] + m1.data[10] * m2.data[8] + m1.data[11] * m2.data[12], m1.data[8] * m2.data[1] + m1.data[9] * m2.data[5] + m1.data[10] * m2.data[9] + m1.data[11] * m2.data[13], m1.data[8] * m2.data[2] + m1.data[9] * m2.data[6] + m1.data[10] * m2.data[10] + m1.data[11] * m2.data[14], m1.data[8] * m2.data[3] + m1.data[9] * m2.data[7] + m1.data[10] * m2.data[11] + m1.data[11] * m2.data[15],
+		m1.data[12] * m2.data[0] + m1.data[13] * m2.data[4] + m1.data[14] * m2.data[8] + m1.data[15] * m2.data[12], m1.data[12] * m2.data[1] + m1.data[13] * m2.data[5] + m1.data[14] * m2.data[9] + m1.data[15] * m2.data[13], m1.data[12] * m2.data[2] + m1.data[13] * m2.data[6] + m1.data[14] * m2.data[10] + m1.data[15] * m2.data[14], m1.data[12] * m2.data[3] + m1.data[13] * m2.data[7] + m1.data[14] * m2.data[11] + m1.data[15] * m2.data[15] });
 }
 // Unrolled Matrix x Vector products
 sml_export template<class T>
 inline Matrix<T, 2, 1> operator * (const Matrix<T, 2, 2>& m1, const Matrix<T, 2, 1>& m2) {
-	return Matrix<T, 2, 1>({ 
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1], 
+	return Matrix<T, 2, 1>({
+		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1],
 		m1.data[2] * m2.data[0] + m1.data[3] * m2.data[1] });
 }
+sml_export template<class T>
+inline Matrix<T, 2, 1> operator * (const Matrix<T, 2, 2>& m1, const Vector<T,2>& m2) {
+	return Matrix<T, 2, 1>({
+		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1],
+		m1.data[2] * m2.data[0] + m1.data[3] * m2.data[1] });
+}
+
+
 sml_export template<class T>
 inline Vector<T, 3> operator * (const Matrix<T, 3, 3>& m, const Vector<T, 3>& v) {
 	return Vector<T, 3>(m.data[0] * v.data[0] + m.data[1] * v.data[1] + m.data[2] * v.data[2],
@@ -410,195 +406,343 @@ inline Vector<T, 3> operator * (const Matrix<T, 3, 3>& m, const Vector<T, 3>& v)
 sml_export template<class T>
 inline Vector<T, 3> operator * (const Vector<T, 3>& v, const Matrix<T, 3, 3>& m) {
 	return Vector<T, 3>(v.data[0] * m.data[0] + v.data[1] * m.data[3] + v.data[2] * m.data[6],
-		v.data[0] * m.data[1] + v.data[1] * m.data[4] + v.data[2] * m.data[7], 
+		v.data[0] * m.data[1] + v.data[1] * m.data[4] + v.data[2] * m.data[7],
 		v.data[0] * m.data[2] + v.data[1] * m.data[5] + v.data[2] * m.data[8]);
 }
 sml_export template<class T>
 inline Matrix<T, 1, 2> operator * (const Matrix<T, 1, 2>& m1, const Matrix<T, 2, 2>& m2) {
-	return Matrix<T, 1, 2>({ 
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[2], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[3]});
+	return Matrix<T, 1, 2>({
+		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[2], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[3] });
 }
 sml_export template<class T>
 inline Matrix<T, 3, 1> operator * (const Matrix<T, 3, 3>& m1, const Matrix<T, 3, 1>& m2) {
 	return Matrix<T, 3, 1>({
 		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1] + m1.data[2] * m2.data[2],
 		m1.data[3] * m2.data[0] + m1.data[4] * m2.data[1] + m1.data[5] * m2.data[2],
-		m1.data[6] * m2.data[0] + m1.data[7] * m2.data[1] + m1.data[8] * m2.data[2]});
+		m1.data[6] * m2.data[0] + m1.data[7] * m2.data[1] + m1.data[8] * m2.data[2] });
 }
 sml_export template<class T>
 inline Matrix<T, 1, 3> operator * (const Matrix<T, 1, 3>& m1, const Matrix<T, 3, 3>& m2) {
 	return Matrix<T, 1, 3>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[3] + m1.data[2] * m2.data[6], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[7], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[8]});
+		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[3] + m1.data[2] * m2.data[6], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[7], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[8] });
 }
 sml_export template<class T>
 inline Matrix<T, 4, 1> operator * (const Matrix<T, 4, 4>& m1, const Matrix<T, 4, 1>& m2) {
 	return Matrix<T, 4, 1>({
-		m1.data[0]  * m2.data[0] + m1.data[1]  * m2.data[1] + m1.data[2]  * m2.data[2] + m1.data[3]  * m2.data[3],
-		m1.data[4]  * m2.data[0] + m1.data[5]  * m2.data[1] + m1.data[6]  * m2.data[2] + m1.data[7]  * m2.data[3],
-		m1.data[8]  * m2.data[0] + m1.data[9]  * m2.data[1] + m1.data[10] * m2.data[2] + m1.data[11] * m2.data[3],
-		m1.data[12] * m2.data[0] + m1.data[13] * m2.data[1] + m1.data[14] * m2.data[2] + m1.data[15] * m2.data[3]});
+		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1] + m1.data[2] * m2.data[2] + m1.data[3] * m2.data[3],
+		m1.data[4] * m2.data[0] + m1.data[5] * m2.data[1] + m1.data[6] * m2.data[2] + m1.data[7] * m2.data[3],
+		m1.data[8] * m2.data[0] + m1.data[9] * m2.data[1] + m1.data[10] * m2.data[2] + m1.data[11] * m2.data[3],
+		m1.data[12] * m2.data[0] + m1.data[13] * m2.data[1] + m1.data[14] * m2.data[2] + m1.data[15] * m2.data[3] });
 }
 sml_export template<class T>
 inline Matrix<T, 1, 4> operator * (const Matrix<T, 1, 4>& m1, const Matrix<T, 4, 4>& m2) {
 	return Matrix<T, 1, 4>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[8] + m1.data[3] * m2.data[12], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[9]  + m1.data[3] * m2.data[13], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[6] + m1.data[2] * m2.data[10] + m1.data[3] * m2.data[14], m1.data[0] * m2.data[3] + m1.data[1] * m2.data[7] + m1.data[2] * m2.data[11] + m1.data[3] * m2.data[15]});
+		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[8] + m1.data[3] * m2.data[12], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[9] + m1.data[3] * m2.data[13], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[6] + m1.data[2] * m2.data[10] + m1.data[3] * m2.data[14], m1.data[0] * m2.data[3] + m1.data[1] * m2.data[7] + m1.data[2] * m2.data[11] + m1.data[3] * m2.data[15] });
 }
 
-// Matrix /= scalar
-sml_export template<class T, size_t nrows, size_t ncols>
-inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator/= (const double t) {
-	if (t == 0) throw std::logic_error("Divide by zero");
+// Scalar multiplication
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator *= (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
-			data[(i * ncols) + j] /= t;
+			data[(i * ncols) + j] *= static_cast<T>(t);
+		}
+	}
+	return *this;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator * (Matrix<T, nrows, ncols> m1, const T2& t) {
+	m1 *= t;
+	return m1;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator * (const T2& t, Matrix<T, nrows, ncols> m1) {
+	m1 *= t;
+	return m1;
+}
+
+// Scalar division
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator /= (const T2& t) {
+	for (int i = 0; i < nrows; i++) {
+		for (int j = 0; j < ncols; j++) {
+			data[(i * ncols) + j] /= static_cast<T>(t);
+		}
+	}
+	return *this;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator / (Matrix<T, nrows, ncols> m1, const T2& t) {
+	m1 /= t;
+	return m1;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator / (const T2& t, Matrix<T, nrows, ncols> m1) {
+	m1 /= t;
+	return m1;
+}
+
+// Add a row to each row of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_row(const Matrix<T2, 1, ncols>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] += static_cast<T>(m2.at(0, j));
+		}
+	}
+	return *this;
+}
+// Subtract a row from each row of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_row(const Matrix<T2, 1, ncols>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] -= static_cast<T>(m2.at(0, j));
+		}
+	}
+	return *this;
+}
+// Multiply each row of a Matrix with a row
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_row(const Matrix<T2, 1, ncols>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] *= static_cast<T>(m2.at(0, j));
+		}
+	}
+	return *this;
+}
+// Divide a each row of a Matrix by a row
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_row(const Matrix<T2, 1, ncols>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] /= static_cast<T>(m2.at(0, j));
+		}
+	}
+	return *this;
+}
+
+// Add a column to each column of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_col(const Matrix<T2, nrows, 1>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] += static_cast<T>(m2.at(i, 0));
+		}
+	}
+	return *this;
+}
+// Subtract a column from each column of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_col(const Matrix<T2, nrows, 1>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] -= static_cast<T>(m2.at(i, 0));
+		}
+	}
+	return *this;
+}
+// Multiply each column of a Matrix with a column
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_col(const Matrix<T2, nrows, 1>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] *= static_cast<T>(m2.at(i, 0));
+		}
+	}
+	return *this;
+}
+// Divide a each column of a Matrix by a column
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_col(const Matrix<T2, nrows, 1>& m2) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] /= static_cast<T>(m2.at(i, 0));
+		}
+	}
+	return *this;
+}
+
+// Add a row to each row of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_row(const Vector<T2, ncols>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] += static_cast<T>(v.at(j));
+		}
+	}
+	return *this;
+}
+// Subtract a row from each row of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_row(const Vector<T2, ncols>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] -= static_cast<T>(v.at(j));
+		}
+	}
+	return *this;
+}
+// Multiply each row of a Matrix with a row
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_row(const Vector<T2, ncols>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] *= static_cast<T>(v.at(j));
+		}
+	}
+	return *this;
+}
+// Divide a each row of a Matrix by a row
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_row(const Vector<T2, ncols>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] /= static_cast<T>(v.at(j));
+		}
+	}
+	return *this;
+}
+
+// Add a column to each column of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_col(const Vector<T2, nrows>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] += static_cast<T>(v.at(i));
+		}
+	}
+	return *this;
+}
+// Subtract a column from each column of a Matrix
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_col(const Vector<T2, nrows>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] -= static_cast<T>(v.at(i));
+		}
+	}
+	return *this;
+}
+// Multiply each column of a Matrix with a column
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_col(const Vector<T2, nrows>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] *= static_cast<T>(v.at(i));
+		}
+	}
+	return *this;
+}
+// Divide a each column of a Matrix by a column
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_col(const Vector<T2, nrows>& v) {
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			(*this)[i][j] /= static_cast<T>(v.at(i));
 		}
 	}
 	return *this;
 }
 
 // Transpose matrices
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, cols, rows> transpose(Matrix <T, rows, cols> original) {
-	Matrix<T, cols, rows> temp;
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
+sml_export template<typename T, size_t nrows, size_t ncols>
+Matrix<T, nrows, ncols> transpose(const Matrix<T, nrows, ncols>& original) {
+	Matrix<T, ncols, nrows> temp;
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
 			temp[j][i] = original[i][j];
 		}
 	}
 	return temp;
 }
 
-// Dot product
-sml_export template<class T, size_t dim1, size_t dim2>
-T dot(Matrix<T, dim1, dim2>& m1, Matrix<T, dim2, dim1>& m2) {
-	// Dot-product between a row vector and a column vector of equal length
-	T output = 0;
-	if (dim1 == 1) {
-		for (int i = 0; i < dim2; i++) {
-			output += (m1.at(0,i) * m2.at(i,0));
-		}
+// Dot product 
+sml_export template<typename T, size_t elements>
+double dot(const Matrix<T, 1, elements>& m1, const Matrix<T, elements, 1>& m2) {
+	double ret = 0;
+	for (size_t i = 0; i < elements; i++) {
+		ret += (m1.at(0, i) * m2.at(i, 0));
 	}
-	else if (dim2 == 1) {
-		for (int i = 0; i < dim1; i++) {
-			output += (m1.at(i,0) * m2.at(0, i));
-		}
-	}
-	else {
-		throw std::domain_error("Incompatible vector dimensions");
-	}
-	return output;
+	return ret;
 }
-
-sml_export template<class T, size_t dim1, size_t dim2>
-T dot(Matrix<T, dim1, dim2>& m1, Matrix<T, dim1, dim2>& m2) {
-	// Dot-product between two vectors of equal length and orientation
-	T output = 0;
-	if (dim1 == 1) {
-		for (int i = 0; i < dim2; i++) {
-			output += (m1.at(0,i) * m2.at(0, i));
-		}
+sml_export template<typename T, size_t elements>
+double dot(const Matrix<T, elements, 1>& m1, const Matrix<T, 1, elements>& m2) {
+	double ret = 0;
+	for (size_t i = 0; i < elements; i++) {
+		ret += (m1.at(i, 0) * m2.at(0, i));
 	}
-	else if (dim2 == 1) {
-		for (int i = 0; i < dim1; i++) {
-			output += (m1.at(i, 0) * m2.at(i, 0));
-		}
-	}
-	else {
-		throw std::domain_error("Incompatible vector dimensions");
-	}
-	return output;
+	return ret;
 }
-
-//Take the absolute value of each component
-sml_export template<class T, size_t rows, size_t cols >
-Matrix<T, rows, cols> abs(Matrix<T, rows, cols>& m) {
-	Matrix<T, rows, cols> ret = m;
-	for (int &i : ret) {
-		i = std::abs(i);
+sml_export template<typename T, size_t elements>
+double dot(const Matrix<T, elements, 1>& m1, const Matrix<T, elements, 1>& m2) {
+	double ret = 0;
+	for (size_t i = 0; i < elements; i++) {
+		ret += (m1.at(i, 0) * m2.at(i, 0));
+	}
+	return ret;
+}
+sml_export template<typename T, size_t elements>
+double dot(const Matrix<T, 1, elements>& m1, const Matrix<T, 1, elements>& m2) {
+	double ret = 0;
+	for (size_t i = 0; i < elements; i++) {
+		ret += (m1.at(0, i) * m2.at(0, i));
 	}
 	return ret;
 }
 
 // Element-wise matrix multiplication (Hadamard product)
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> multiply_elements(const Matrix<T, rows, cols>& m1, const Matrix<T, rows, cols>& m2) {
-	Matrix<T, rows, cols> ret = m1;
-	std::transform(ret.begin(), ret.end(), m2.begin(), ret.begin(), [](T i, T j) -> T {return i * j; });
-	return ret;
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+Matrix<T, nrows, ncols> multiply_elements(Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
+	std::transform(m1.begin(), m1.end(), m2.begin(), m1.begin(), [](T i, T2 j) -> T {return i * static_cast<T>(j); });
+	return m1;
 }
 
-// Multiply each row by the contents of a row vector
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> multiply_elements(const Matrix<T, rows, cols>& m1, const Matrix<T, 1, cols>& m2) {
-	Matrix<T, rows, cols> ret = m1;
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
-			ret[i][j] *= m2[0][j];
-		}
+// Calculate the trace of a matrix
+sml_export template<typename T, size_t dim>
+T trace(const Matrix<T, dim, dim>& m) {
+	T ret = 0;
+	for (size_t i = 0; i < dim; i++) {
+		ret += m.at(i, i);
 	}
 	return ret;
 }
 
-// Multiply each column by the contents of a column vector
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> multiply_elements(const Matrix<T, rows, cols>& m1, const Matrix<T, rows, 1>& m2) {
-	Matrix<T, rows, cols> ret = m1;
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
-			ret[i][j] *= m2[i][0];
-		}
-	}
-	return ret;
-}
+sml_export template<typename T, size_t dim>
+std::tuple<Matrix<T, dim, dim>, Matrix<size_t, dim, dim>, size_t> LUPDecomposition(const Matrix<T, dim, dim>& m) {
 
-// Element-wise matrix division
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> divide_elements(const Matrix<T, rows, cols>& m1, const Matrix<T, rows, cols>& m2) {
-	Matrix<T, rows, cols> ret = m1;
-	std::transform(ret.begin(), ret.end(), m2.begin(), ret.begin(), [](T i, T j) -> T {return i / j; });
-	return ret;
-}
-
-// Divide each row by the contents of a row vector
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> divide_elements(const Matrix<T, rows, cols>& m1, const Matrix<T, 1, cols>& m2) {
-	Matrix<T, rows, cols> ret = m1;
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
-			ret[i][j] /= m2[0][j];
-		}
-	}
-	return ret;
-}
-
-// Divide each column by the contents of a column vector
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> divide_elements(const Matrix<T, rows, cols>& m1, const Matrix<T, rows, 1>& m2) {
-	Matrix<T, rows, cols> ret = m1;
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
-			ret[i][j] /= m2[i][0];
-		}
-	}
-	return ret;
-}
-
-sml_export template<class T, size_t dim>
-std::tuple<Matrix<double, dim, dim>, Matrix<int, dim, dim>, int> LUPDecomposition(const Matrix<T, dim, dim> &m) {
-	
-	Matrix<double, dim, dim> A;
-	for (int i = 0; i < m.size(); i++) {
+	Matrix<T, dim, dim> A;
+	for (size_t i = 0; i < m.size(); i++) {
 		A.data[i] = m.data[i];
 	}
 
-	int numberOfPivots = dim;
-	Matrix<int, dim, dim> pivot_matrix(0);
+	size_t numberOfPivots = dim;
+	Matrix<size_t, dim, dim> pivot_matrix(0);
 
-	int maxI = 0, j = 0, k = 0;
+	size_t maxI = 0, j = 0, k = 0;
 	T maxA, absA;
 	T ptr;
 
-	for (int i = 0; i < dim; i++) {
+	for (size_t i = 0; i < dim; i++) {
 		maxA = 0.0;
 		maxI = i;
 
@@ -616,12 +760,12 @@ std::tuple<Matrix<double, dim, dim>, Matrix<int, dim, dim>, int> LUPDecompositio
 			pivot_matrix.data[maxI] = j;
 
 			// Pivot rows of A
-			for (int r = 0; r < dim; r++) {
+			for (size_t r = 0; r < dim; r++) {
 				ptr = A[i][r];
 				A[i][r] = A[maxI][r];
 				A[maxI][r] = ptr;
 			}
-			
+
 			// We store the number of pivots in the final element of the unit permutation vector
 			numberOfPivots++;
 		}
@@ -637,48 +781,48 @@ std::tuple<Matrix<double, dim, dim>, Matrix<int, dim, dim>, int> LUPDecompositio
 	return std::make_tuple(A, pivot_matrix, numberOfPivots);
 }
 
-sml_export template<class T, size_t dim>
+sml_export template<typename T, size_t dim>
 T det(const Matrix<T, dim, dim>& m) {
 
 	// Returns the determinant of matrix m from its LUP decomposition
 
-	Matrix<double, dim, dim> A;
-	Matrix<int, dim, dim> P;
-	int numberOfPermutations;
+	Matrix<T, dim, dim> A;
+	Matrix<size_t, dim, dim> P;
+	size_t numberOfPermutations = 0;
 
 	std::tie(A, P, numberOfPermutations) = LUPDecomposition(m);
 
 	T det = A[0][0];
-	for (int i = 1; i < dim; i++) {
+	for (size_t i = 1; i < dim; i++) {
 		det *= A[i][i];
 	}
 
 	return (numberOfPermutations - dim) % 2 == 0 ? det : -det;
 }
 
-sml_export template<class T, size_t dim>
+sml_export template<typename T, size_t dim>
 Matrix<T, dim, dim> inverse(const Matrix<T, dim, dim>& m) {
 
 	// Returns the inverse of matrix m from its LUP decomposition
 
-	Matrix<double, dim, dim> A;
-	Matrix<int, dim, dim> P;
-	int numberOfPermutations = 0;
+	Matrix<T, dim, dim> A;
+	Matrix<size_t, dim, dim> P;
+	size_t numberOfPermutations = 0;
 
 	Matrix<T, dim, dim> ret(0);
 
 	std::tie(A, P, numberOfPermutations) = LUPDecomposition(m);
 
-	for (int j = 0; j < dim; j++) {
-		for (int i = 0; i < dim; i++) {
+	for (size_t j = 0; j < dim; j++) {
+		for (size_t i = 0; i < dim; i++) {
 			ret[i][j] = (P.data[i] == j ? 1.0 : 0.0);
 
-			for (int k = 0; k < i; k++) {
+			for (size_t k = 0; k < i; k++) {
 				ret[i][j] -= A[i][k] * ret[k][j];
 			}
 		}
-		for (int i = dim - 1; i >= 0; i--) {
-			for (int k = i + 1; k < dim; k++) {
+		for (size_t i = dim - 1; i >= 0; i--) {
+			for (size_t k = i + 1; k < dim; k++) {
 				ret[i][j] -= A[i][k] * ret[k][j];
 			}
 			ret[i][j] /= A[i][i];
@@ -687,9 +831,20 @@ Matrix<T, dim, dim> inverse(const Matrix<T, dim, dim>& m) {
 	return ret;
 }
 
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> lerp(const Matrix<T, rows, cols>& m1, const Matrix<T, rows, cols>& m2, const T t) {
-	return (m1 + ((m2 - m1) * t));
+//Take the absolute value of each component
+using std::abs;
+sml_export template<typename T, size_t nrows, size_t ncols >
+Matrix<T, nrows, ncols> abs(Matrix<T, nrows, ncols>& m) {
+	Matrix<T, nrows, ncols> ret = m;
+	for (T& i : ret) {
+		i = std::abs(i);
+	}
+	return ret;
+}
+
+sml_export template<typename T, size_t rows, size_t cols, typename T2, typename T3>
+Matrix<T, rows, cols> lerp(const Matrix<T, rows, cols>& m1, const Matrix<T2, rows, cols>& m2, const T3 t) {
+	return (m1 + ((m2 - m1) * static_cast<T>(t)));
 }
 
 // Return the index of the largest element
@@ -717,31 +872,32 @@ T min(const Matrix<T, nrows, ncols>& m) {
 }
 
 // Clamp
-sml_export template<class T, size_t rows, size_t cols>
-Matrix<T, rows, cols> clamp(const Matrix<T, rows, cols>& m, const T& t1, const T& t2) {
-	Matrix<T, rows, cols> ret = m; std::transform(ret.begin(), ret.end(), ret.begin(), [t1, t2](T i) -> T {return std::clamp(i, t1, t2); });	return ret;
+sml_export template<typename T, size_t nrows, size_t ncols>
+Matrix<T, nrows, ncols> clamp(const Matrix<T, nrows, ncols>& m, const T& t1, const T& t2) {
+	Matrix<T, nrows, ncols> ret = m; std::transform(ret.begin(), ret.end(), ret.begin(), [t1, t2](T i) -> T {return std::clamp(i, t1, t2); });
+	return ret;
 }
 
 // Create a rotation matrix for a rotation about the X-axis
 sml_export inline Matrix<float, 4, 4> RotateX(const float radians) {
-	return Matrix<float, 4, 4>{ {   1.0f, 0.0f, 0.0f, 0.0f,
+	return Matrix<float, 4, 4>( 1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, cos(radians), -sin(radians), 0.0f,
 		0.0f, sin(radians), cos(radians), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f }};
+		0.0f, 0.0f, 0.0f, 1.0f );
 }
 // Create a rotation matrix for a rotation about the Y-axis
 sml_export inline Matrix<float, 4, 4> RotateY(const float radians) {
-	return Matrix<float, 4, 4>{ {   cos(radians), 0.0f, sin(radians), 0.0f,
+	return Matrix<float, 4, 4>(   cos(radians), 0.0f, sin(radians), 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		-sin(radians), 0.0f, cos(radians), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f }};
+		0.0f, 0.0f, 0.0f, 1.0f );
 }
 // Create a rotation matrix for a rotation about the Z-axis
 sml_export inline Matrix<float, 4, 4> RotateZ(const float radians) {
-	return Matrix<float, 4, 4>{ {   cos(radians), -sin(radians), 0.0f, 0.0f,
+	return Matrix<float, 4, 4>(   cos(radians), -sin(radians), 0.0f, 0.0f,
 		sin(radians), cos(radians), 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f }};
+		0.0f, 0.0f, 0.0f, 1.0f );
 }
 
 // Shorthand definitions
