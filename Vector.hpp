@@ -23,14 +23,24 @@ public:
 	template<typename T2>
 	Vector(T2 t) {
 		for (size_t i = 0; i < elements; i++) {
-			data[i] = static_cast<T>(t);
+			data.at(i) = static_cast<T>(t);
 		}
 	}
 	template<typename ...T2>
 	Vector(T2 ...ts) : data{ static_cast<T>(ts)... } {}
 	template<typename T2>
 	Vector(const Vector<T2, elements>& v2) {
-		std::copy(v2.begin(), v2.end(), data.begin());
+		std::transform(v2.begin(), v2.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
+	}
+	template<typename T2>
+	Vector(const T2 arr[elements]) {
+		for (size_t i = 0; i < elements; i++) {
+			data.at(i) = static_cast<T>(arr[i]);
+		}
+	}
+	template<typename T2>
+	Vector(const std::array<T2, elements> arr) {
+		std::transform(arr.begin(), arr.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
 	}
 
 	inline T operator [] (int i) const { return data[i]; }
@@ -348,61 +358,28 @@ Vector<T, 3> abs(const Vector<T, 3>& v) {
 	return Vector<T, 3>(abs(v[0]), abs(v[1]), abs(v[2]));
 }
 
+sml_export template<typename T, size_t elements, typename T2, typename T3>
+Vector<T, elements> lerp(const Vector<T, elements>& v1, const Vector<T2, elements>& v2, const T3 t) {
+	return (v1 + ((v2 - v1) * static_cast<T>(t)));
+}
+
 // Return the index containing the largest value
 sml_export template<typename T, size_t elements>
-int max_element(const Vector<T, elements>& v) {
-	int maxI = 0;
-	for (int i = 1; i < elements; i++) {
-		if (v[maxI] < v[i])
-			maxI = i;
-	}
-	return maxI;
+size_t max_element(const Vector<T, elements>& v) {
+	std::distance(v.begin(), std::max_element(v.begin(), v.end()));
 }
 
 // Return the index containing the smallest value
 sml_export template<typename T, size_t elements>
-int min_element(const Vector<T, elements>& v) {
-	int minI = 0;
-	for (int i = 0; i < elements; i++) {
-		if (v[minI] > v[i])
-			minI = i;
-	}
-	return minI;
+size_t min_element(const Vector<T, elements>& v) {
+	std::distance(v.begin(), std::min_element(v.begin(), v.end()));
 }
 
-using std::min;
-// Given two equal-length vectors, return a vector containing the smallest value for each dimension, 
+// Return the largest element
 sml_export template<typename T, size_t elements>
-Vector<T, elements> min(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
-	Vector<T, elements> ret;
-	for (size_t i = 0; i < elements; i++) {
-		ret[i] = v1[i] < v2[i] ? v1[i] : v2[i];
-	}
-	return ret;
+T max(const Vector<T, elements>& v) {
+	return *std::max_element(v.begin(), v.end());
 }
-// Given two 2-vectors, return a 2-vector containing the smallest value for each dimension
-sml_export template<typename T>
-Vector<T, 2> min(const Vector<T, 2>& v1, const Vector<T, 2>& v2) {
-	return Vector<T, 2>(v1[0] < v2[0] ? v1[0] : v2[0],
-		v1[1] < v2[1] ? v1[1] : v2[1]);
-}
-// Given two 3-vectors, return a 3-vector containing the smallest value for each dimension
-sml_export template<typename T>
-Vector<T, 3> min(const Vector<T, 3>& v1, const Vector<T, 3>& v2) {
-	return Vector<T, 3>(v1[0] < v2[0] ? v1[0] : v2[0],
-		v1[1] < v2[1] ? v1[1] : v2[1],
-		v1[2] < v2[2] ? v1[2] : v2[2]);
-}
-// Given two 4-vectors, return a 4-vector containing the smallest value for each dimension
-sml_export template<typename T>
-Vector<T, 4> min(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
-	return Vector<T, 4>(v1[0] < v2[0] ? v1[0] : v2[0],
-		v1[1] < v2[1] ? v1[1] : v2[1],
-		v1[2] < v2[2] ? v1[2] : v2[2],
-		v1[3] < v2[3] ? v1[3] : v2[3]);
-}
-
-using std::max;
 // Given two equal-length vectors, return a vector containing the largest value for each dimension, 
 sml_export template<typename T, size_t elements>
 Vector<T, elements> max(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
@@ -432,6 +409,42 @@ Vector<T, 4> max(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
 		v1[1] > v2[1] ? v1[1] : v2[1],
 		v1[2] > v2[2] ? v1[2] : v2[2],
 		v1[3] > v2[3] ? v1[3] : v2[3]);
+}
+
+// Return the smallest element
+sml_export template<typename T, size_t elements>
+T min(const Vector<T, elements>& v) {
+	return *std::min_element(v.begin(), v.end());
+}
+// Given two equal-length vectors, return a vector containing the smallest value for each dimension, 
+sml_export template<typename T, size_t elements>
+Vector<T, elements> min(const Vector<T, elements>& v1, const Vector<T, elements>& v2) {
+	Vector<T, elements> ret;
+	for (size_t i = 0; i < elements; i++) {
+		ret[i] = v1[i] < v2[i] ? v1[i] : v2[i];
+	}
+	return ret;
+}
+// Given two 2-vectors, return a 2-vector containing the smallest value for each dimension
+sml_export template<typename T>
+Vector<T, 2> min(const Vector<T, 2>& v1, const Vector<T, 2>& v2) {
+	return Vector<T, 2>(v1[0] < v2[0] ? v1[0] : v2[0],
+		v1[1] < v2[1] ? v1[1] : v2[1]);
+}
+// Given two 3-vectors, return a 3-vector containing the smallest value for each dimension
+sml_export template<typename T>
+Vector<T, 3> min(const Vector<T, 3>& v1, const Vector<T, 3>& v2) {
+	return Vector<T, 3>(v1[0] < v2[0] ? v1[0] : v2[0],
+		v1[1] < v2[1] ? v1[1] : v2[1],
+		v1[2] < v2[2] ? v1[2] : v2[2]);
+}
+// Given two 4-vectors, return a 4-vector containing the smallest value for each dimension
+sml_export template<typename T>
+Vector<T, 4> min(const Vector<T, 4>& v1, const Vector<T, 4>& v2) {
+	return Vector<T, 4>(v1[0] < v2[0] ? v1[0] : v2[0],
+		v1[1] < v2[1] ? v1[1] : v2[1],
+		v1[2] < v2[2] ? v1[2] : v2[2],
+		v1[3] < v2[3] ? v1[3] : v2[3]);
 }
 
 // Reorder vector indices as desired

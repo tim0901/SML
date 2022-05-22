@@ -692,28 +692,28 @@ Matrix<T, rows, cols> lerp(const Matrix<T, rows, cols>& m1, const Matrix<T, rows
 	return (m1 + ((m2 - m1) * t));
 }
 
-// Return the largest element
-sml_export template<class T, size_t rows, size_t cols>
-int max(const Matrix<T, rows, cols>& m) {
-	return std::distance(m.begin(), std::max(m.begin(), m.end()));
-}
-
 // Return the index of the largest element
-sml_export template<class T, size_t rows, size_t cols>
-int max_element(const Matrix<T, rows, cols>& m) {
+sml_export template<typename T, size_t nrows, size_t ncols>
+size_t max_element(const Matrix<T, nrows, ncols>& m) {
 	return std::distance(m.begin(), std::max_element(m.begin(), m.end()));
 }
 
-// Return the smallest element
-sml_export template<class T, size_t rows, size_t cols>
-int min(const Matrix<T, rows, cols>& m) {
-	return std::distance(m.begin(), std::min(m.begin(), m.end()));
+// Return the index of the smallest element
+sml_export template<typename T, size_t nrows, size_t ncols>
+size_t min_element(const Matrix<T, nrows, ncols>& m) {
+	return std::distance(m.begin(), std::min_element(m.begin(), m.end()));
 }
 
-// Return the index of the smallest element
-sml_export template<class T, size_t rows, size_t cols>
-int min_element(const Matrix<T, rows, cols>& m) {
-	return std::distance(m.begin(), std::min_element(m.begin(), m.end()));
+// Return the largest element
+sml_export template<typename T, size_t nrows, size_t ncols>
+T max(const Matrix<T, nrows, ncols>& m) {
+	return *std::max_element(m.begin(), m.end());
+}
+
+// Return the smallest element
+sml_export template<typename T, size_t nrows, size_t ncols>
+T min(const Matrix<T, nrows, ncols>& m) {
+	return *std::min_element(m.begin(), m.end());
 }
 
 // Clamp
