@@ -105,8 +105,7 @@ public:
 		return ret;
 	}
 
-	// Operators
-
+	// Unary operators
 	inline const Matrix& operator + () const { return *this; }
 	inline Matrix operator - () const {
 		Matrix<T, nrows, ncols> ret = *this;
@@ -114,12 +113,15 @@ public:
 		return ret;
 	}
 
+	// Comparison operators
 	inline bool operator == (const Matrix<T, nrows, ncols>& m2) {
 		return std::equal(data.begin(), data.end(), m2.begin(), m2.end());
 	}
 	inline bool operator != (const Matrix<T, nrows, ncols>& m2) {
 		return !(*this == m2);
 	}
+
+	// Arithmetic operators
 
 	// Addition
 	template<typename T2>
@@ -143,6 +145,13 @@ public:
 	template<typename T2>
 	inline Matrix<T, nrows, ncols>& operator /= (const T2& t);
 
+	// Modulus - requires integer operands
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator %= (const Matrix<T2, nrows, ncols>& m2);
+	template<typename T2>
+	inline Matrix<T, nrows, ncols>& operator %= (const T2& t);
+
+	// Assignment operator
 	template<typename T2>
 	inline Matrix<T, nrows, ncols>& operator = (const Matrix<T2, nrows, ncols>& m2) {
 		std::transform(m2.begin(), m2.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
@@ -481,6 +490,45 @@ inline Matrix<T, nrows, ncols>& operator / (Matrix<T, nrows, ncols> m1, const T2
 sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
 inline Matrix<T, nrows, ncols>& operator / (const T2& t, Matrix<T, nrows, ncols> m1) {
 	m1 /= t;
+	return m1;
+}
+
+// Matrix modulus - requires integer operands
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator %= (const Matrix<T2, nrows, ncols>& m2) {
+	for (int i = 0; i < nrows; i++) {
+		for (int j = 0; j < ncols; j++) {
+			data[(i * ncols) + j] %= static_cast<T>(m2.at(i, j));
+		}
+	}
+	return *this;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator % (Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
+	m1 %= m2;
+	return m1;
+}
+
+// Scalar modulus - requires integer operands
+sml_export template<typename T, size_t nrows, size_t ncols>
+template<typename T2>
+inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator %= (const T2& t) {
+	for (int i = 0; i < nrows; i++) {
+		for (int j = 0; j < ncols; j++) {
+			data[(i * ncols) + j] %= static_cast<T>(t);
+		}
+	}
+	return *this;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator % (Matrix<T, nrows, ncols> m1, const T2& t) {
+	m1 %= t;
+	return m1;
+}
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+inline Matrix<T, nrows, ncols>& operator % (const T2& t, Matrix<T, nrows, ncols> m1) {
+	m1 %= t;
 	return m1;
 }
 

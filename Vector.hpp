@@ -43,14 +43,17 @@ public:
 		std::transform(arr.begin(), arr.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
 	}
 
+	// Access elements with v[i]
 	inline T operator [] (int i) const { return data[i]; }
 	inline T operator [] (size_t i) const { return data[i]; }
 	inline T& operator [] (int i) { return data[i]; }
 	inline T& operator [] (size_t i) { return data[i]; }
 
+	// Access elements with v.at(i)
 	inline T at(int i) const { return data.at(i); }
 	inline T& at(int i) { return data.at(i); }
 
+	// Unary operators
 	inline const Vector& operator + () const { return *this; }
 	inline Vector operator - () const {
 		Vector<T, elements> ret = *this; 
@@ -58,14 +61,16 @@ public:
 		return ret;
 	}
 
+	// Comparison operators
 	inline bool operator == (const Vector<T, elements>& v2) {
 		return std::equal(data.begin(), data.end(), v2.begin(), v2.end());
 	}
-
 	inline bool operator != (const Vector<T, elements>& v2) {
 		return !(*this == v2);
 	}
 
+	// Arithmetic operators
+	
 	// Addition
 	template<typename T2>
 	inline Vector<T, elements>& operator += (const Vector<T2, elements>& v2);
@@ -90,6 +95,13 @@ public:
 	template<typename T2>
 	inline Vector<T, elements>& operator /= (const T2& t);
 
+	// Modulus - requires integer operands
+	template<typename T2>
+	inline Vector<T, elements>& operator %= (const Vector<T2, elements>& v2);
+	template<typename T2>
+	inline Vector<T, elements>& operator %= (const T2& t);
+
+	// Assignment operator
 	template<typename T2>
 	inline Vector& operator = (const Vector<T2, elements>& v2) {
 		std::transform(v2.begin(), v2.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
@@ -310,6 +322,41 @@ inline Vector<T, elements> operator / (const T2& t, Vector<T, elements> v1) {
 	for (size_t i = 0; i < elements; i++) {
 		v1[i] = static_cast<T>(t) / v1[i];
 	}
+	return v1;
+}
+
+// Vector modulus - requires integer operands
+sml_export template<typename T, size_t elements>
+template<typename T2>
+inline Vector<T, elements>& Vector<T, elements>::operator %= (const Vector<T2, elements>& v2) {
+	for (size_t i = 0; i < elements; i++) {
+		data[i] %= static_cast<T>(v2[i]);
+	}
+	return *this;
+}
+sml_export template<typename T, size_t elements, typename T2>
+inline Vector<T, elements> operator % (Vector<T, elements> v1, const Vector<T2, elements>& v2) {
+	v1 %= v2;
+	return v1;
+}
+
+// Scalar modulus - requires integer operands
+sml_export template<typename T, size_t elements>
+template<typename T2>
+inline Vector<T, elements>& Vector<T, elements>::operator%= (const T2& t) {
+	for (size_t i = 0; i < elements; i++) {
+		data[i] %= static_cast<T>(t);
+	}
+	return *this;
+}
+sml_export template<typename T, size_t elements, typename T2>
+inline Vector<T, elements> operator % (Vector<T, elements> v1, const T2& t) {
+	v1 %= t;
+	return v1;
+}
+sml_export template<typename T, size_t elements, typename T2>
+inline Vector<T, elements> operator % (const T2& t, Vector<T, elements> v1) {
+	v1 %= t;
 	return v1;
 }
 
