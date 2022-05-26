@@ -1,8 +1,8 @@
 module;
-#include <array>
-#include <algorithm>
-#include <iostream>
-#include <vector>
+export import <array>;
+export import <algorithm>;
+export import <iostream>;
+export import <vector>;
 
 #ifndef sml_export
 #define sml_export export
