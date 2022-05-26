@@ -1,3 +1,4 @@
+module;
 #include <array>
 #include <algorithm>
 #include <iostream>
