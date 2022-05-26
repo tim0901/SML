@@ -413,13 +413,13 @@ Vector<T, elements> lerp(const Vector<T, elements>& v1, const Vector<T2, element
 // Return the index containing the largest value
 sml_export template<typename T, size_t elements>
 size_t max_element(const Vector<T, elements>& v) {
-	std::distance(v.begin(), std::max_element(v.begin(), v.end()));
+	return std::distance(v.begin(), std::max_element(v.begin(), v.end()));
 }
 
 // Return the index containing the smallest value
 sml_export template<typename T, size_t elements>
 size_t min_element(const Vector<T, elements>& v) {
-	std::distance(v.begin(), std::min_element(v.begin(), v.end()));
+	return std::distance(v.begin(), std::min_element(v.begin(), v.end()));
 }
 
 // Return the largest element
