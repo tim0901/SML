@@ -1,4 +1,5 @@
-module;
+export module sml:Vector;
+
 export import <array>;
 export import <algorithm>;
 export import <iostream>;
@@ -8,6 +9,5 @@ export import <vector>;
 #define sml_export export
 #endif
 
-export module sml:Vector;
 #define SML_MODULE_VECTOR
 #include "Vector.hpp"

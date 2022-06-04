@@ -44,9 +44,7 @@ public:
 	}
 
 	// Access elements with v[i]
-	inline T operator [] (int i) const { return data[i]; }
 	inline T operator [] (size_t i) const { return data[i]; }
-	inline T& operator [] (int i) { return data[i]; }
 	inline T& operator [] (size_t i) { return data[i]; }
 
 	// Access elements with v.at(i)
