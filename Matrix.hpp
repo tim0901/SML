@@ -58,16 +58,16 @@ public:
 	// TODO: Construct from sub-matricecs (rows/column vectors, squares eg. Pauli matrices)
 
 	// Access elements with M[row][column]
-	inline std::array<T, nrows * ncols>::iterator operator [] (int i) { return data.begin() + (i * ncols); }
-	inline std::array<T, nrows* ncols>::const_iterator operator [] (int i) const { return data.begin() + (i * ncols); }
+	inline std::array<T, nrows * ncols>::iterator operator [] (size_t i) { return data.begin() + (i * ncols); }
+	inline std::array<T, nrows* ncols>::const_iterator operator [] (size_t i) const { return data.begin() + (i * ncols); }
 	// (This class uses row-major memory ordering)
 
 	// Access elements with m.at(i)
-	inline T at(int i) const { return data.at(i); }
-	inline T& at(int i) { return data.at(i); }
+	inline T at(size_t i) const { return data.at(i); }
+	inline T& at(size_t i) { return data.at(i); }
 	// Access elements with m.at(row, column)
-	inline T at(int r, int c) const { return data.at((r * ncols) + c); }
-	inline T& at(int r, int c) { return data.at((r * ncols) + c); }
+	inline T at(size_t r, size_t c) const { return data.at((r * ncols) + c); }
+	inline T& at(size_t r, size_t c) { return data.at((r * ncols) + c); }
 
 	// Fetch an individual row as a Matrix
 	inline Matrix<T, 1, ncols> row_matrix(int r) const {
@@ -229,7 +229,7 @@ public:
 
 // Ostream << operator. Allows matrices to be printed to the console using eg cout
 sml_export template<class T, size_t nrows, size_t ncols>
-inline std::ostream& operator << (std::ostream& os, const Matrix<T, nrows, ncols>& m) {
+inline std::ostream& operator << (std::ostream& os, const Matrix<T, nrows, ncols> m) {
 	// For each column, find the longest element
 
 	std::vector<size_t> column_widths(ncols);
@@ -357,7 +357,7 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator *= (const Matr
 	return (*this) * m2;
 }
 sml_export template<typename T, size_t outside_rows, size_t inside_dim, size_t outside_cols, typename T2>
-inline Matrix<T, outside_rows, outside_cols>& operator * (Matrix<T, outside_rows, inside_dim> m1, const Matrix<T2, inside_dim, outside_cols>& m2) {
+inline Matrix<T, outside_rows, outside_cols>& operator * (const Matrix<T, outside_rows, inside_dim>& m1, const Matrix<T2, inside_dim, outside_cols>& m2) {
 	Matrix<T, outside_rows, outside_cols> ret(0);
 	for (int i = 0; i < outside_rows; i++) {
 		for (int j = 0; j < outside_cols; j++) {
@@ -373,80 +373,157 @@ inline Matrix<T, outside_rows, outside_cols>& operator * (Matrix<T, outside_rows
 sml_export template<class T>
 inline Matrix<T, 2, 2> operator * (const Matrix<T, 2, 2>& m1, const Matrix<T, 2, 2>& m2) {
 	return Matrix<T, 2, 2>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[2], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[3],
-		m1.data[2] * m2.data[0] + m1.data[3] * m2.data[2], m1.data[2] * m2.data[1] + m1.data[3] * m2.data[3] });
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(2), m1.at(0) * m2.at(1) + m1.at(1) * m2.at(3),
+		m1.at(2) * m2.at(0) + m1.at(3) * m2.at(2), m1.at(2) * m2.at(1) + m1.at(3) * m2.at(3) });
 }
 sml_export template<class T>
 inline Matrix<T, 3, 3> operator * (const Matrix<T, 3, 3>& m1, const Matrix<T, 3, 3>& m2) {
 	return Matrix<T, 3, 3>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[3] + m1.data[2] * m2.data[6], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[7], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[8],
-		m1.data[3] * m2.data[0] + m1.data[4] * m2.data[3] + m1.data[5] * m2.data[6], m1.data[3] * m2.data[1] + m1.data[4] * m2.data[4] + m1.data[5] * m2.data[7], m1.data[3] * m2.data[2] + m1.data[4] * m2.data[5] + m1.data[5] * m2.data[8],
-		m1.data[6] * m2.data[0] + m1.data[7] * m2.data[3] + m1.data[8] * m2.data[6], m1.data[6] * m2.data[1] + m1.data[7] * m2.data[4] + m1.data[8] * m2.data[7], m1.data[6] * m2.data[2] + m1.data[7] * m2.data[5] + m1.data[8] * m2.data[8] });
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(3) + m1.at(2) * m2.at(6), m1.at(0) * m2.at(1) + m1.at(1) * m2.at(4) + m1.at(2) * m2.at(7), m1.at(0) * m2.at(2) + m1.at(1) * m2.at(5) + m1.at(2) * m2.at(8),
+		m1.at(3) * m2.at(0) + m1.at(4) * m2.at(3) + m1.at(5) * m2.at(6), m1.at(3) * m2.at(1) + m1.at(4) * m2.at(4) + m1.at(5) * m2.at(7), m1.at(3) * m2.at(2) + m1.at(4) * m2.at(5) + m1.at(5) * m2.at(8),
+		m1.at(6) * m2.at(0) + m1.at(7) * m2.at(3) + m1.at(8) * m2.at(6), m1.at(6) * m2.at(1) + m1.at(7) * m2.at(4) + m1.at(8) * m2.at(7), m1.at(6) * m2.at(2) + m1.at(7) * m2.at(5) + m1.at(8) * m2.at(8) });
 }
 sml_export template<class T>
 inline Matrix<T, 4, 4> operator * (const Matrix<T, 4, 4>& m1, const Matrix<T, 4, 4>& m2) {
 	return Matrix<T, 4, 4>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[8] + m1.data[3] * m2.data[12], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[9] + m1.data[3] * m2.data[13], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[6] + m1.data[2] * m2.data[10] + m1.data[3] * m2.data[14], m1.data[0] * m2.data[3] + m1.data[1] * m2.data[7] + m1.data[2] * m2.data[11] + m1.data[3] * m2.data[15],
-		m1.data[4] * m2.data[0] + m1.data[5] * m2.data[4] + m1.data[6] * m2.data[8] + m1.data[7] * m2.data[12], m1.data[4] * m2.data[1] + m1.data[5] * m2.data[5] + m1.data[6] * m2.data[9] + m1.data[7] * m2.data[13], m1.data[4] * m2.data[2] + m1.data[5] * m2.data[6] + m1.data[6] * m2.data[10] + m1.data[7] * m2.data[14], m1.data[4] * m2.data[3] + m1.data[5] * m2.data[7] + m1.data[6] * m2.data[11] + m1.data[7] * m2.data[15],
-		m1.data[8] * m2.data[0] + m1.data[9] * m2.data[4] + m1.data[10] * m2.data[8] + m1.data[11] * m2.data[12], m1.data[8] * m2.data[1] + m1.data[9] * m2.data[5] + m1.data[10] * m2.data[9] + m1.data[11] * m2.data[13], m1.data[8] * m2.data[2] + m1.data[9] * m2.data[6] + m1.data[10] * m2.data[10] + m1.data[11] * m2.data[14], m1.data[8] * m2.data[3] + m1.data[9] * m2.data[7] + m1.data[10] * m2.data[11] + m1.data[11] * m2.data[15],
-		m1.data[12] * m2.data[0] + m1.data[13] * m2.data[4] + m1.data[14] * m2.data[8] + m1.data[15] * m2.data[12], m1.data[12] * m2.data[1] + m1.data[13] * m2.data[5] + m1.data[14] * m2.data[9] + m1.data[15] * m2.data[13], m1.data[12] * m2.data[2] + m1.data[13] * m2.data[6] + m1.data[14] * m2.data[10] + m1.data[15] * m2.data[14], m1.data[12] * m2.data[3] + m1.data[13] * m2.data[7] + m1.data[14] * m2.data[11] + m1.data[15] * m2.data[15] });
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(4) + m1.at(2) * m2.at(8) + m1.at(3) * m2.at(12), m1.at(0) * m2.at(1) + m1.at(1) * m2.at(5) + m1.at(2) * m2.at(9) + m1.at(3) * m2.at(13), m1.at(0) * m2.at(2) + m1.at(1) * m2.at(6) + m1.at(2) * m2.at(10) + m1.at(3) * m2.at(14), m1.at(0) * m2.at(3) + m1.at(1) * m2.at(7) + m1.at(2) * m2.at(11) + m1.at(3) * m2.at(15),
+		m1.at(4) * m2.at(0) + m1.at(5) * m2.at(4) + m1.at(6) * m2.at(8) + m1.at(7) * m2.at(12), m1.at(4) * m2.at(1) + m1.at(5) * m2.at(5) + m1.at(6) * m2.at(9) + m1.at(7) * m2.at(13), m1.at(4) * m2.at(2) + m1.at(5) * m2.at(6) + m1.at(6) * m2.at(10) + m1.at(7) * m2.at(14), m1.at(4) * m2.at(3) + m1.at(5) * m2.at(7) + m1.at(6) * m2.at(11) + m1.at(7) * m2.at(15),
+		m1.at(8) * m2.at(0) + m1.at(9) * m2.at(4) + m1.at(10) * m2.at(8) + m1.at(11) * m2.at(12), m1.at(8) * m2.at(1) + m1.at(9) * m2.at(5) + m1.at(10) * m2.at(9) + m1.at(11) * m2.at(13), m1.at(8) * m2.at(2) + m1.at(9) * m2.at(6) + m1.at(10) * m2.at(10) + m1.at(11) * m2.at(14), m1.at(8) * m2.at(3) + m1.at(9) * m2.at(7) + m1.at(10) * m2.at(11) + m1.at(11) * m2.at(15),
+		m1.at(12) * m2.at(0) + m1.at(13) * m2.at(4) + m1.at(14) * m2.at(8) + m1.at(15) * m2.at(12), m1.at(12) * m2.at(1) + m1.at(13) * m2.at(5) + m1.at(14) * m2.at(9) + m1.at(15) * m2.at(13), m1.at(12) * m2.at(2) + m1.at(13) * m2.at(6) + m1.at(14) * m2.at(10) + m1.at(15) * m2.at(14), m1.at(12) * m2.at(3) + m1.at(13) * m2.at(7) + m1.at(14) * m2.at(11) + m1.at(15) * m2.at(15) });
 }
-// Unrolled Matrix x Vector products
+
+// Matrix * Vector / Column Matrix = Column Matrix
+
+sml_export template<typename T, size_t dim, typename T2>
+inline Matrix<T, dim, 1>& operator * (const Matrix<T, dim, dim>& m, const Vector<T2, dim>& v) {
+	Matrix<T, dim, 1> ret(0);
+	for (int i = 0; i < dim; i++) {
+		for (int j = 0; j < dim; j++) {
+			ret[i][0] += (m[i][j] * static_cast<T>(v[j]));
+		}
+	}
+	return ret;
+}
+
+//Unrolled for small, common combinations
+
+// 2x2 Matrix * 2x1 Column Matrix = 2x1 Matrix
 sml_export template<class T>
 inline Matrix<T, 2, 1> operator * (const Matrix<T, 2, 2>& m1, const Matrix<T, 2, 1>& m2) {
 	return Matrix<T, 2, 1>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1],
-		m1.data[2] * m2.data[0] + m1.data[3] * m2.data[1] });
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(1),
+		m1.at(2) * m2.at(0) + m1.at(3) * m2.at(1) });
 }
+// 2x2 Matrix * 2-Vector = 2x1 Matrix
 sml_export template<class T>
-inline Matrix<T, 2, 1> operator * (const Matrix<T, 2, 2>& m1, const Vector<T,2>& m2) {
+inline Matrix<T, 2, 1> operator * (const Matrix<T, 2, 2>& m1, const Vector<T, 2>& v) {
 	return Matrix<T, 2, 1>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1],
-		m1.data[2] * m2.data[0] + m1.data[3] * m2.data[1] });
+		m1.at(0) * v.at(0) + m1.at(1) * v.at(1),
+		m1.at(2) * v.at(0) + m1.at(3) * v.at(1) });
 }
-
-
-sml_export template<class T>
-inline Vector<T, 3> operator * (const Matrix<T, 3, 3>& m, const Vector<T, 3>& v) {
-	return Vector<T, 3>(m.data[0] * v.data[0] + m.data[1] * v.data[1] + m.data[2] * v.data[2],
-		m.data[3] * v.data[0] + m.data[4] * v.data[1] + m.data[5] * v.data[2],
-		m.data[6] * v.data[0] + m.data[7] * v.data[1] + m.data[8] * v.data[2]);
-}
-sml_export template<class T>
-inline Vector<T, 3> operator * (const Vector<T, 3>& v, const Matrix<T, 3, 3>& m) {
-	return Vector<T, 3>(v.data[0] * m.data[0] + v.data[1] * m.data[3] + v.data[2] * m.data[6],
-		v.data[0] * m.data[1] + v.data[1] * m.data[4] + v.data[2] * m.data[7],
-		v.data[0] * m.data[2] + v.data[1] * m.data[5] + v.data[2] * m.data[8]);
-}
-sml_export template<class T>
-inline Matrix<T, 1, 2> operator * (const Matrix<T, 1, 2>& m1, const Matrix<T, 2, 2>& m2) {
-	return Matrix<T, 1, 2>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[2], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[3] });
-}
+// 3x3 Matrix * 3x1 Column Matrix = 3x1 Matrix
 sml_export template<class T>
 inline Matrix<T, 3, 1> operator * (const Matrix<T, 3, 3>& m1, const Matrix<T, 3, 1>& m2) {
 	return Matrix<T, 3, 1>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1] + m1.data[2] * m2.data[2],
-		m1.data[3] * m2.data[0] + m1.data[4] * m2.data[1] + m1.data[5] * m2.data[2],
-		m1.data[6] * m2.data[0] + m1.data[7] * m2.data[1] + m1.data[8] * m2.data[2] });
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(1) + m1.at(2) * m2.at(2),
+		m1.at(3) * m2.at(0) + m1.at(4) * m2.at(1) + m1.at(5) * m2.at(2),
+		m1.at(6) * m2.at(0) + m1.at(7) * m2.at(1) + m1.at(8) * m2.at(2) });
 }
+// 3x3 Matrix * 3-Vector = 3x1 Matrix
 sml_export template<class T>
-inline Matrix<T, 1, 3> operator * (const Matrix<T, 1, 3>& m1, const Matrix<T, 3, 3>& m2) {
-	return Matrix<T, 1, 3>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[3] + m1.data[2] * m2.data[6], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[7], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[8] });
+inline Matrix<T, 3, 1> operator * (const Matrix<T, 3, 3>& m, const Vector<T, 3>& v) {
+	return Matrix<T, 3, 1>({ 
+		m.at(0) * v.at(0) + m.at(1) * v.at(1) + m.at(2) * v.at(2),
+		m.at(3) * v.at(0) + m.at(4) * v.at(1) + m.at(5) * v.at(2),
+		m.at(6) * v.at(0) + m.at(7) * v.at(1) + m.at(8) * v.at(2) });
 }
+// 4x4 Matrix * 4x1 Column Matrix = 4x1 Matrix
 sml_export template<class T>
 inline Matrix<T, 4, 1> operator * (const Matrix<T, 4, 4>& m1, const Matrix<T, 4, 1>& m2) {
 	return Matrix<T, 4, 1>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[1] + m1.data[2] * m2.data[2] + m1.data[3] * m2.data[3],
-		m1.data[4] * m2.data[0] + m1.data[5] * m2.data[1] + m1.data[6] * m2.data[2] + m1.data[7] * m2.data[3],
-		m1.data[8] * m2.data[0] + m1.data[9] * m2.data[1] + m1.data[10] * m2.data[2] + m1.data[11] * m2.data[3],
-		m1.data[12] * m2.data[0] + m1.data[13] * m2.data[1] + m1.data[14] * m2.data[2] + m1.data[15] * m2.data[3] });
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(1) + m1.at(2) * m2.at(2) + m1.at(3) * m2.at(3),
+		m1.at(4) * m2.at(0) + m1.at(5) * m2.at(1) + m1.at(6) * m2.at(2) + m1.at(7) * m2.at(3),
+		m1.at(8) * m2.at(0) + m1.at(9) * m2.at(1) + m1.at(10) * m2.at(2) + m1.at(11) * m2.at(3),
+		m1.at(12) * m2.at(0) + m1.at(13) * m2.at(1) + m1.at(14) * m2.at(2) + m1.at(15) * m2.at(3) });
 }
+// 4x4 Matrix * 4-Vector = 4x1 Matrix
+sml_export template<class T>
+inline Matrix<T, 4, 1> operator * (const Matrix<T, 4, 4>& m1, const Vector<T, 4>& v) {
+	return Matrix<T, 4, 1>({
+		m1.at(0) * v.at(0) + m1.at(1) * v.at(1) + m1.at(2) * v.at(2) + m1.at(3) * v.at(3),
+		m1.at(4) * v.at(0) + m1.at(5) * v.at(1) + m1.at(6) * v.at(2) + m1.at(7) * v.at(3),
+		m1.at(8) * v.at(0) + m1.at(9) * v.at(1) + m1.at(10) * v.at(2) + m1.at(11) * v.at(3),
+		m1.at(12) * v.at(0) + m1.at(13) * v.at(1) + m1.at(14) * v.at(2) + m1.at(15) * v.at(3) });
+}
+
+// Vector / Row Matrix * Matrix = Row Matrix
+
+sml_export template<typename T, size_t dim, typename T2>
+inline Matrix<T, 1, dim>& operator * (const Vector<T2, dim>& v, const Matrix<T, dim, dim>& m) {
+	Matrix<T, 1, dim> ret(0);
+	for (int i = 0; i < dim; i++) {
+		for (int j = 0; j < dim; j++) {
+			ret[0][i] += (m[j][i] * static_cast<T>(v[j]));
+		}
+	}
+	return ret;
+}
+
+// 1x2 Row Matrix * 2x2 Matrix = 1x2 Matrix
+sml_export template<class T>
+inline Matrix<T, 1, 2> operator * (const Matrix<T, 1, 2>& m1, const Matrix<T, 2, 2>& m2) {
+	return Matrix<T, 1, 2>({
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(2), m1.at(0) * m2.at(1) + m1.at(1) * m2.at(3) });
+}
+// 2-Vector * 2x2 Matrix = 1x2 Matrix
+sml_export template<class T>
+inline Matrix<T, 1, 2> operator * (const Vector<T, 2>& v, const Matrix<T, 2, 2>& m) {
+	return Matrix<T, 1, 2>({
+		v.at(0) * m.at(0) + v.at(1) * m.at(2), v.at(0) * m.at(1) + v.at(1) * m.at(3) });
+}
+// 1x3 Row Matrix * 3x3 Matrix = 1x3 Matrix
+sml_export template<class T>
+inline Matrix<T, 1, 3> operator * (const Matrix<T, 1, 3>& m1, const Matrix<T, 3, 3>& m2) {
+	return Matrix<T, 1, 3>({
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(3) + m1.at(2) * m2.at(6), m1.at(0) * m2.at(1) + m1.at(1) * m2.at(4) + m1.at(2) * m2.at(7), m1.at(0) * m2.at(2) + m1.at(1) * m2.at(5) + m1.at(2) * m2.at(8) });
+}
+// 3-Vector * 3x3 Matrix = 1x3 Matrix
+sml_export template<class T>
+inline Matrix<T, 1, 3> operator * (const Vector<T, 3>& v, const Matrix<T, 3, 3>& m) {
+	return Matrix<T, 1, 3>({ 
+		v.at(0) * m.at(0) + v.at(1) * m.at(3) + v.at(2) * m.at(6),
+		v.at(0) * m.at(1) + v.at(1) * m.at(4) + v.at(2) * m.at(7),
+		v.at(0) * m.at(2) + v.at(1) * m.at(5) + v.at(2) * m.at(8) });
+}
+// 1x4 Row Matrix * 4x4 Matrix = 1x4 Matrix
 sml_export template<class T>
 inline Matrix<T, 1, 4> operator * (const Matrix<T, 1, 4>& m1, const Matrix<T, 4, 4>& m2) {
 	return Matrix<T, 1, 4>({
-		m1.data[0] * m2.data[0] + m1.data[1] * m2.data[4] + m1.data[2] * m2.data[8] + m1.data[3] * m2.data[12], m1.data[0] * m2.data[1] + m1.data[1] * m2.data[5] + m1.data[2] * m2.data[9] + m1.data[3] * m2.data[13], m1.data[0] * m2.data[2] + m1.data[1] * m2.data[6] + m1.data[2] * m2.data[10] + m1.data[3] * m2.data[14], m1.data[0] * m2.data[3] + m1.data[1] * m2.data[7] + m1.data[2] * m2.data[11] + m1.data[3] * m2.data[15] });
+		m1.at(0) * m2.at(0) + m1.at(1) * m2.at(4) + m1.at(2) * m2.at(8) + m1.at(3) * m2.at(12), m1.at(0) * m2.at(1) + m1.at(1) * m2.at(5) + m1.at(2) * m2.at(9) + m1.at(3) * m2.at(13), m1.at(0) * m2.at(2) + m1.at(1) * m2.at(6) + m1.at(2) * m2.at(10) + m1.at(3) * m2.at(14), m1.at(0) * m2.at(3) + m1.at(1) * m2.at(7) + m1.at(2) * m2.at(11) + m1.at(3) * m2.at(15) });
+}
+// 4-Vector * 4x4 Matrix = 1x4 Matrix
+sml_export template<class T>
+inline Matrix<T, 1, 4> operator * (const Vector<T, 4>& v, const Matrix<T, 4, 4>& m) {
+	return Matrix<T, 1, 4>({
+		v.at(0) * m.at(0) + v.at(1) * m.at(4) + v.at(2) * m.at(8) + v.at(3) * m.at(12), v.at(0) * m.at(1) + v.at(1) * m.at(5) + v.at(2) * m.at(9) + v.at(3) * m.at(13), v.at(0) * m.at(2) + v.at(1) * m.at(6) + v.at(2) * m.at(10) + v.at(3) * m.at(14), v.at(0) * m.at(3) + v.at(1) * m.at(7) + v.at(2) * m.at(11) + v.at(3) * m.at(15) });
+}
+
+// Outer Product - Returns the Matrix multiplication of two Vectors, with the first treated as a 1xm Matrix and the second as an mx1 Matrix.
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+Matrix<T, nrows, ncols> outer_product(const Vector<T, nrows>& v1, const Vector<T2, ncols>& v2) {
+	Matrix<T, nrows, ncols> ret(0);
+	for (size_t i = 0; i < nrows; i++) {
+		for (size_t j = 0; j < ncols; j++) {
+			ret[i][j] = v1[i] * static_cast<T>(v2[j]);
+		}
+	}
+	return ret;
+}
+
+// Outer Product - Returns the Matrix multiplication of a row Matrix and a column Matrix.
+sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+Matrix<T, nrows, ncols> outer_product(const Matrix<T, nrows, 1>& m1, const Matrix<T2, 1, ncols>& m2) {
+	return m1 * m2;
 }
 
 // Scalar multiplication
@@ -776,21 +853,25 @@ T trace(const Matrix<T, dim, dim>& m) {
 }
 
 sml_export template<typename T, size_t dim>
-std::tuple<Matrix<T, dim, dim>, Matrix<size_t, dim, dim>, size_t> LUPDecomposition(const Matrix<T, dim, dim>& m) {
+std::tuple<Matrix<float, dim, dim>, Vector<size_t, dim + 1>> LUPDecomposition(const Matrix<T, dim, dim>& m) {
 
-	Matrix<T, dim, dim> A;
-	for (size_t i = 0; i < m.size(); i++) {
-		A.data[i] = m.data[i];
+	Matrix<float, dim, dim> A;
+	for (int i = 0; i < m.size(); i++) {
+		A.at(i) = static_cast<float>(m.at(i));
 	}
 
-	size_t numberOfPivots = dim;
-	Matrix<size_t, dim, dim> pivot_matrix(0);
+	size_t numberOfPivots = 0;
+	Vector<size_t, dim + 1> pivot_matrix(0);
 
-	size_t maxI = 0, j = 0, k = 0;
-	T maxA, absA;
-	T ptr;
+	int maxI = 0, j = 0, k = 0, i = 0;
+	float maxA, absA;
+	float ptr;
 
-	for (size_t i = 0; i < dim; i++) {
+	for (i = 0; i <= dim; i++) {
+		pivot_matrix.at(i) = i;
+	}
+
+	for (i = 0; i < dim; i++) {
 		maxA = 0.0;
 		maxI = i;
 
@@ -803,9 +884,9 @@ std::tuple<Matrix<T, dim, dim>, Matrix<size_t, dim, dim>, size_t> LUPDecompositi
 
 		if (maxI != i) {
 			// Pivoting P
-			j = pivot_matrix.data[i];
-			pivot_matrix.data[i] = pivot_matrix.data[maxI];
-			pivot_matrix.data[maxI] = j;
+			j = static_cast<int>(pivot_matrix.at(i));
+			pivot_matrix.at(i) = pivot_matrix.at(maxI);
+			pivot_matrix.at(maxI) = j;
 
 			// Pivot rows of A
 			for (size_t r = 0; r < dim; r++) {
@@ -815,7 +896,7 @@ std::tuple<Matrix<T, dim, dim>, Matrix<size_t, dim, dim>, size_t> LUPDecompositi
 			}
 
 			// We store the number of pivots in the final element of the unit permutation vector
-			numberOfPivots++;
+			pivot_matrix.at(dim)++;
 		}
 
 		for (j = i + 1; j < dim; j++) {
@@ -826,26 +907,38 @@ std::tuple<Matrix<T, dim, dim>, Matrix<size_t, dim, dim>, size_t> LUPDecompositi
 		}
 	}
 
-	return std::make_tuple(A, pivot_matrix, numberOfPivots);
+	return std::make_tuple(A, pivot_matrix);
 }
 
 sml_export template<typename T, size_t dim>
-T det(const Matrix<T, dim, dim>& m) {
+float det(const Matrix<T, dim, dim>& m) {
 
 	// Returns the determinant of matrix m from its LUP decomposition
 
 	Matrix<T, dim, dim> A;
-	Matrix<size_t, dim, dim> P;
+	Vector<size_t, dim + 1> P;
 	size_t numberOfPermutations = 0;
 
-	std::tie(A, P, numberOfPermutations) = LUPDecomposition(m);
+	std::tie(A, P) = LUPDecomposition(m);
 
-	T det = A[0][0];
-	for (size_t i = 1; i < dim; i++) {
-		det *= A[i][i];
+	float det = static_cast<float>(A[0][0]);
+	for (int i = 1; i < dim; i++) {
+		det *= static_cast<float>(A[i][i]);
 	}
 
-	return (numberOfPermutations - dim) % 2 == 0 ? det : -det;
+	return (P.at(dim) - dim) % 2 == 0 ? det : -det;
+}
+
+sml_export template<typename T>
+double det(const Matrix<T, 2, 2>& m) {
+	return static_cast<double>((m[0][0] * m[1][1]) - (m[0][1] * m[1][0]));
+}
+
+sml_export template<typename T>
+double det(const Matrix<T, 3, 3>& m) {
+	return static_cast<double>(m[0][0] * ((m[1][1] * m[2][2]) - (m[1][2] * m[2][1]))
+		- m[0][1] * ((m[1][0] * m[2][2]) - (m[1][2] * m[2][0]))
+		+ m[0][2] * ((m[1][0] * m[2][1]) - (m[1][1] * m[2][0])));
 }
 
 sml_export template<typename T, size_t dim>
