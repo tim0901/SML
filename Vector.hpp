@@ -178,6 +178,17 @@ inline std::ostream& operator << (std::ostream& os, const Vector<T, elements>& v
 	return os;
 }
 
+// Write vector to wostream
+sml_export template<typename T, size_t elements>
+inline std::wostream& operator << (std::wostream& os, const Vector<T, elements>& v) {
+	for (size_t i = 0; i < elements; i++) {
+		os << v[i];
+		if (i < (elements - 1))
+			os << " ";
+	}
+	return os;
+}
+
 // Vector addition
 sml_export template<typename T, size_t elements>
 template<typename T2>

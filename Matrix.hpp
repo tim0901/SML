@@ -272,6 +272,51 @@ inline std::ostream& operator << (std::ostream& os, const Matrix<T, nrows, ncols
 	return os;
 }
 
+// Wostream << operator. Allows matrices to be printed to the console using eg wcout
+sml_export template<class T, size_t nrows, size_t ncols>
+inline std::wostream& operator << (std::wostream& os, const Matrix<T, nrows, ncols> m) {
+	// For each column, find the longest element
+
+	std::vector<size_t> column_widths(ncols);
+	Matrix<std::wstring, nrows, ncols> stringMatrix;
+
+	// Find the longest element in each column to determine their widths
+	for (int i = 0; i < ncols; i++) {
+		std::vector<std::wstring> stringVector(0);
+		// Convert Ts to std::strings
+		for (int j = 0; j < nrows; j++) {
+			stringMatrix[j][i] = std::to_wstring(m[j][i]);
+			// Trim trailing zeroes / decimal points from floating point types
+			if (std::is_floating_point_v<T>) {
+				stringMatrix[j][i].erase(stringMatrix[j][i].find_last_not_of('0') + 1, std::wstring::npos);
+				stringMatrix[j][i].erase(stringMatrix[j][i].find_last_not_of('.') + 1, std::wstring::npos);
+			}
+			stringVector.push_back(stringMatrix[j][i]);
+		}
+		column_widths[i] = std::max_element(stringVector.begin(), stringVector.end(), [](std::wstring& const lhs, std::wstring& const rhs) {
+			return lhs.size() < rhs.size();
+			}
+		)->size();
+	}
+
+	// Write matrix to os
+	for (int i = 0; i < nrows; i++) {
+		for (int j = 0; j < ncols; j++) {
+			// Pad extra spaces to ensure correct column spacing
+			while (stringMatrix[i][j].size() < column_widths[j])
+			{
+				stringMatrix[i][j] += L" ";
+			}
+
+			os << stringMatrix[i][j] << L" ";
+		}
+		if (i < (nrows - 1))
+			os << L"\n";
+	}
+
+	return os;
+}
+
 // Matrix addition
 sml_export template<typename T, size_t nrows, size_t ncols>
 template<typename T2>
