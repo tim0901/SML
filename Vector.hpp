@@ -60,10 +60,10 @@ public:
 	}
 
 	// Comparison operators
-	inline bool operator == (const Vector<T, elements>& v2) {
+	inline bool operator == (const Vector<T, elements>& v2) const {
 		return std::equal(data.begin(), data.end(), v2.begin(), v2.end());
 	}
-	inline bool operator != (const Vector<T, elements>& v2) {
+	inline bool operator != (const Vector<T, elements>& v2) const {
 		return !(*this == v2);
 	}
 
