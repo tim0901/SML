@@ -987,34 +987,70 @@ double det(const Matrix<T, 3, 3>& m) {
 }
 
 sml_export template<typename T, size_t dim>
-Matrix<T, dim, dim> inverse(const Matrix<T, dim, dim>& m) {
-
-	// Returns the inverse of matrix m from its LUP decomposition
-
-	Matrix<T, dim, dim> A;
-	Matrix<size_t, dim, dim> P;
-	size_t numberOfPermutations = 0;
-
+Matrix<T, dim, dim> identity() {
 	Matrix<T, dim, dim> ret(0);
-
-	std::tie(A, P, numberOfPermutations) = LUPDecomposition(m);
-
-	for (size_t j = 0; j < dim; j++) {
-		for (size_t i = 0; i < dim; i++) {
-			ret[i][j] = (P.data[i] == j ? 1.0 : 0.0);
-
-			for (size_t k = 0; k < i; k++) {
-				ret[i][j] -= A[i][k] * ret[k][j];
-			}
-		}
-		for (size_t i = dim - 1; i >= 0; i--) {
-			for (size_t k = i + 1; k < dim; k++) {
-				ret[i][j] -= A[i][k] * ret[k][j];
-			}
-			ret[i][j] /= A[i][i];
-		}
+	for (size_t i = 0; i < dim; i++) {
+		ret[i][i] = 1;
 	}
 	return ret;
+}
+
+sml_export template<typename T, size_t nrows, size_t ncols>
+Matrix<T, nrows, ncols> exchange_columns(Matrix<T, nrows, ncols>& m, const size_t& colA, const size_t& colB) {
+	for (size_t i = 0; i < nrows; i++) {
+		std::swap(m.at(i, colA), m.at(i, colB));
+	}
+	return m;
+}
+
+sml_export template<typename T, size_t nrows, size_t ncols>
+Matrix<T, nrows, ncols> exchange_rows(Matrix<T, nrows, ncols>& m, const size_t& colA, const size_t& colB) {
+	for (size_t i = 0; i < ncols; i++) {
+		std::swap(m.at(colA, i), m.at(colB, i));
+	}
+	return m;
+}
+
+sml_export template<typename T, size_t dim>
+Matrix<T, dim, dim> inverse(const Matrix<T, dim, dim>& m) {
+
+	Matrix<T, dim, dim> I = identity<T, dim>();
+	Matrix<T, dim, dim> M = m;
+
+	for (size_t i = 0; i < dim; i++) {
+		if (M.at(i, i) == 0 ) {
+			// Swap with a row below it
+			for (size_t j = i; j < dim; j++) {
+				if (M.at(j, j) != 0) {
+					exchange_columns(M, i, j);
+					exchange_columns(I, i, j);
+				}
+			}
+			if (M.at(i, i) == 0)
+				return Matrix<T, dim, dim>(0);
+		}
+
+		// Divide row by value
+		T temp = 1.0/M.at(i, i);
+		for (size_t j = 0; j < dim; j++) {
+			M.at(i, j) *= temp;
+			I.at(i, j) *= temp;
+		}
+
+		// Annihilate entries above and below the pivot
+		for (size_t j = 0; j < dim; j++) {
+			if (j == i)
+				continue;
+			// Subtract the current row multiplied by the element being annihilated
+			T factor = M.at(j, i) / M.at(i,i);
+			for (size_t k = 0; k < dim; k++) {
+				M.at(j, k) -= (factor * M.at(i, k));
+				I.at(j, k) -= (factor * I.at(i, k));
+			}
+		}
+	}
+
+	return I;
 }
 
 //Take the absolute value of each component
