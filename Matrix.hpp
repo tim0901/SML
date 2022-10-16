@@ -1122,6 +1122,131 @@ sml_export inline Matrix<float, 4, 4> RotateZ(const float radians) {
 		0.0f, 0.0f, 0.0f, 1.0f );
 }
 
+// Return the square matrix to the top left that is 1 smaller in each dimension eg a 3x3 from a 4x4
+sml_export template<typename T, size_t dim>
+	requires (dim >= 2)
+sml::Matrix<T, dim - 1, dim - 1> top_left(const sml::Matrix<T, dim, dim>& m) {
+	sml::Matrix<T, dim - 1, dim - 1> ret(0);
+	for (int i = 0; i < (dim - 1); i++) {
+		for (int j = 0; j < (dim - 1); j++) {
+			ret.at(i, j) = m.at(i, j);
+		}
+	}
+	return ret;
+}
+sml_export template<typename T, size_t dim>
+	requires (dim <= 1)
+T top_left(const sml::Matrix<T, dim, dim>& m) {
+	return m.at(0, 0);
+}
+
+// Return the square matrix to the top right that is 1 smaller in each dimension eg a 3x3 from a 4x4
+sml_export template<typename T, size_t dim>
+	requires (dim >= 2)
+sml::Matrix<T, dim - 1, dim - 1> top_right(const sml::Matrix<T, dim, dim>& m) {
+	sml::Matrix<T, dim - 1, dim - 1> ret(0);
+	for (int i = 0; i < (dim - 1); i++) {
+		for (int j = 1; j < dim; j++) {
+			ret.at(i, j - 1) = m.at(i, j);
+		}
+	}
+	return ret;
+}
+sml_export template<typename T, size_t dim>
+	requires (dim <= 1)
+T top_right(const sml::Matrix<T, dim, dim>& m) {
+	return m.at(0, 1);
+}
+
+// Return the square matrix to the bottom left that is 1 smaller in each dimension eg a 3x3 from a 4x4
+sml_export template<typename T, size_t dim>
+	requires (dim >= 2)
+sml::Matrix<T, dim - 1, dim - 1> bottom_left(const sml::Matrix<T, dim, dim>& m) {
+	sml::Matrix<T, dim - 1, dim - 1> ret(0);
+	for (int i = 1; i < dim; i++) {
+		for (int j = 0; j < dim - 1; j++) {
+			ret.at(i - 1, j) = m.at(i, j);
+		}
+	}
+	return ret;
+}
+
+sml_export template<typename T, size_t dim>
+	requires (dim <= 1)
+T bottom_left(const sml::Matrix<T, dim, dim>& m) {
+	return m.at(1, 0);
+}
+
+// Return the square matrix to the bottom right that is 1 smaller in each dimension eg a 3x3 from a 4x4
+sml_export template<typename T, size_t dim>
+	requires (dim >= 2)
+sml::Matrix<T, dim - 1, dim - 1> bottom_right(const sml::Matrix<T, dim, dim>& m) {
+	sml::Matrix<T, dim - 1, dim - 1> ret(0);
+	for (int i = 1; i < dim; i++) {
+		for (int j = 1; j < dim; j++) {
+			ret.at(i - 1, j - 1) = m.at(i, j);
+		}
+	}
+	return ret;
+}
+sml_export template<typename T, size_t dim>
+	requires (dim <= 1)
+T bottom_right(const sml::Matrix<T, dim, dim>& m) {
+	return m.at(1, 1);
+}
+
+// Efficiently calculate the inverse transpose of a Mat44f - useful for shaders
+sml_export sml::Matrix<float, 4, 4> inverse_transpose(const sml::Matrix<float, 4, 4> m) {
+	float subFactor00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+	float subFactor01 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+	float subFactor02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+	float subFactor03 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+	float subFactor04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+	float subFactor05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+	float subFactor06 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
+	float subFactor07 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+	float subFactor08 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+	float subFactor09 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
+	float subFactor10 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+	float subFactor11 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+	float subFactor12 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
+	float subFactor13 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
+	float subFactor14 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+	float subFactor15 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
+	float subFactor16 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+	float subFactor17 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+	sml::Matrix<float, 4, 4> inverse;
+	inverse[0][0] = +(m[1][1] * subFactor00 - m[1][2] * subFactor01 + m[1][3] * subFactor02);
+	inverse[0][1] = -(m[1][0] * subFactor00 - m[1][2] * subFactor03 + m[1][3] * subFactor04);
+	inverse[0][2] = +(m[1][0] * subFactor01 - m[1][1] * subFactor03 + m[1][3] * subFactor05);
+	inverse[0][3] = -(m[1][0] * subFactor02 - m[1][1] * subFactor04 + m[1][2] * subFactor05);
+
+	inverse[1][0] = -(m[0][1] * subFactor00 - m[0][2] * subFactor01 + m[0][3] * subFactor02);
+	inverse[1][1] = +(m[0][0] * subFactor00 - m[0][2] * subFactor03 + m[0][3] * subFactor04);
+	inverse[1][2] = -(m[0][0] * subFactor01 - m[0][1] * subFactor03 + m[0][3] * subFactor05);
+	inverse[1][3] = +(m[0][0] * subFactor02 - m[0][1] * subFactor04 + m[0][2] * subFactor05);
+
+	inverse[2][0] = +(m[0][1] * subFactor06 - m[0][2] * subFactor07 + m[0][3] * subFactor08);
+	inverse[2][1] = -(m[0][0] * subFactor06 - m[0][2] * subFactor09 + m[0][3] * subFactor10);
+	inverse[2][2] = +(m[0][0] * subFactor07 - m[0][1] * subFactor09 + m[0][3] * subFactor11);
+	inverse[2][3] = -(m[0][0] * subFactor08 - m[0][1] * subFactor10 + m[0][2] * subFactor11);
+
+	inverse[3][0] = -(m[0][1] * subFactor12 - m[0][2] * subFactor13 + m[0][3] * subFactor14);
+	inverse[3][1] = +(m[0][0] * subFactor12 - m[0][2] * subFactor15 + m[0][3] * subFactor16);
+	inverse[3][2] = -(m[0][0] * subFactor13 - m[0][1] * subFactor15 + m[0][3] * subFactor17);
+	inverse[3][3] = +(m[0][0] * subFactor14 - m[0][1] * subFactor16 + m[0][2] * subFactor17);
+
+	float determinant =
+		+m[0][0] * inverse[0][0]
+		+ m[0][1] * inverse[0][1]
+		+ m[0][2] * inverse[0][2]
+		+ m[0][3] * inverse[0][3];
+
+	inverse /= determinant;
+	return inverse;
+}
+	-
 // Shorthand definitions
 sml_export using Mat22d = Matrix<double, 2, 2>;
 sml_export using Mat23d = Matrix<double, 2, 3>;
