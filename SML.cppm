@@ -6,3 +6,4 @@ export module sml;
 
 export import :Vector;
 export import :Matrix;
+export import :Quaternion;

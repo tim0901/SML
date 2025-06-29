@@ -1,4 +1,8 @@
-export module sml:Vector;
+export module sml:Quaternion;
+
+#ifndef sml_export
+#define sml_export export
+#endif
 
 #ifdef SML_NO_IMPORT_STD
 
@@ -12,11 +16,6 @@ import <vector>;
 import std;
 #endif // SML_NO_IMPORT_STD
 
-
-
-#ifndef sml_export
-#define sml_export export
-#endif
-
+import :Vector;
 #define SML_MODULE_VECTOR
-#include "Vector.hpp"
+#include "Quaternion.hpp"

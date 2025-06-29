@@ -170,7 +170,7 @@ namespace sml {
 			inline constexpr std::array<T, elements>::size_type size() const noexcept { return data.size(); }
 			inline constexpr std::array<T, elements>::size_type max_size() const noexcept { return data.max_size(); }
 			inline constexpr bool empty() const noexcept { return data.empty(); }
-
+		private:
 			std::array<T, elements> data = {};
 	};
 

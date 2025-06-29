@@ -1246,7 +1246,7 @@ sml_export sml::Matrix<float, 4, 4> inverse_transpose(const sml::Matrix<float, 4
 	inverse /= determinant;
 	return inverse;
 }
-	-
+	
 // Shorthand definitions
 sml_export using Mat22d = Matrix<double, 2, 2>;
 sml_export using Mat23d = Matrix<double, 2, 3>;
