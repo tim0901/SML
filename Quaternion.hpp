@@ -11,10 +11,12 @@ namespace sml {
 			scalar = { static_cast<T>(0) };
 			vector = { static_cast<T>(0) };
 		}
+		template<typename T2>
+		Quaternion(const T2 c) : scalar{ static_cast<T>(c) }, vector{ Vector<T, 3>(static_cast<T>(c),static_cast<T>(c),static_cast<T>(c)) } {};
 		template<typename T2, typename T3>
 		Quaternion(const T2 s, const Vector<T3, 3> v) : scalar{ static_cast<T>(s) }, vector{ v } {};
-		template<typename T2>
-		Quaternion(const T2 s, const T2 v0, const T2 v1, const T2 v2) : scalar{ static_cast<T>(s) }, vector{ Vector<T, 3>(v0,v1,v2) } {};
+		template<typename T2, typename T3, typename T4, typename T5>
+		Quaternion(const T2 s, const T3 v0, const T4 v1, const T5 v2) : scalar{ static_cast<T>(s) }, vector{ Vector<T, 3>(static_cast<T>(v0),static_cast<T>(v1),static_cast<T>(v2)) } {};
 		template<typename T2>
 		Quaternion(const T2 arr[4]) {
 			scalar[0] = { static_cast<T>(arr[0]) };
