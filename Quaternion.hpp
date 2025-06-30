@@ -201,6 +201,16 @@ namespace sml {
 		inline Quaternion<T> operator* (Quaternion<T> q, const T2& t) {
 		return q *= t;
 	}
+
+	sml_export template<typename T>
+		inline double squared_length(const Quaternion<T>& q) {
+		return (q.q0() * q.q0()) + (q.q1() * q.q1()) + (q.q2() * q.q2()) + (q.q3() * q.q3());
+	}
+
+	sml_export template<typename T>
+		inline double length(const Quaternion<T>& q) {
+		return std::sqrt(squared_length(q));
+	}
 }
 
 #endif // SML_QUATERNION_HPP

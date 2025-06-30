@@ -389,7 +389,7 @@ namespace sml {
 	// Calculate the length of the vector
 	sml_export template<typename T, size_t elements>
 		double length(const Vector<T, elements>& v) {
-		return sqrt(squared_length(v));
+		return std::sqrt(squared_length(v));
 	}
 
 	// Calculate the square of the length of the vector
