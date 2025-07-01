@@ -346,6 +346,20 @@ namespace sml {
 								ik - sj, jk + si, 1.0 - isq - jsq);
 	}
 
+	sml_export template<typename T, typename T2>
+	inline Vector<T2, 3> RotateActive(const Vector<T2, 3> pos, const Quaternion<T> rot) {
+		Quaternion<T> temp(0, pos);
+		temp = Inverse(rot) * temp * rot;
+		return temp.vector;
+	}
+
+	sml_export template<typename T, typename T2>
+	inline Vector<T2, 3> RotatePassive(const Vector<T2, 3> pos, const Quaternion<T> rot) {
+		Quaternion<T> temp(0, pos);
+		temp = rot * temp * Inverse(rot);
+		return temp.vector;
+	}
+
 	sml_export using Quatf = Quaternion<float>;
 	sml_export using Quatd = Quaternion<double>;
 }
