@@ -88,6 +88,7 @@ namespace sml {
 		inline T& q1() { return vector[0]; }
 		inline T& q2() { return vector[1]; }
 		inline T& q3() { return vector[2]; }
+		inline T& s() { return scalar[0]; }
 		inline T& i() { return vector[0]; }
 		inline T& j() { return vector[1]; }
 		inline T& k() { return vector[2]; }
@@ -95,6 +96,7 @@ namespace sml {
 		inline T q1() const { return vector[0]; }
 		inline T q2() const { return vector[1]; }
 		inline T q3() const { return vector[2]; }
+		inline T s() const { return scalar[0]; }
 		inline T i() const { return vector[0]; }
 		inline T j() const { return vector[1]; }
 		inline T k() const { return vector[2]; }
@@ -299,6 +301,45 @@ namespace sml {
 		ret.k() = std::copysign(ret.k(), mat.at(1, 0) - mat.at(0, 1));
 		
 		return ret;
+	}
+
+	sml_export template<typename T>
+		inline Matrix<T, 4, 4> QuaternionTo44RotationMatrix(const Quaternion<T>& q) {
+
+		T isq = 2.0 * q.i() * q.i();
+		T jsq = 2.0 * q.j() * q.j();
+		T ksq = 2.0 * q.k() * q.k();
+
+		T si = 2.0 * q.s() * q.i();
+		T ij = 2.0 * q.i() * q.j();
+		T jk = 2.0 * q.j() * q.k();
+		T sk = 2.0 * q.s() * q.k();
+		T ik = 2.0 * q.i() * q.k();
+		T sj = 2.0 * q.s() * q.j();
+
+		return Matrix<T,4,4>(1.0 - jsq - ksq, ij - sk, ik + sj, 0.0,
+							 ij + sk, 1.0 - isq - ksq, jk - si, 0.0,
+							 ik - sj, jk + si, 1.0 - isq - jsq, 0.0, 
+							 0.0, 0.0, 0.0, 1.0);
+	}
+
+	sml_export template<typename T>
+		inline Matrix<T, 3, 3> QuaternionTo33RotationMatrix(const Quaternion<T>& q) {
+
+		T isq = 2.0 * q.i() * q.i();
+		T jsq = 2.0 * q.j() * q.j();
+		T ksq = 2.0 * q.k() * q.k();
+
+		T si = 2.0 * q.s() * q.i();
+		T ij = 2.0 * q.i() * q.j();
+		T jk = 2.0 * q.j() * q.k();
+		T sk = 2.0 * q.s() * q.k();
+		T ik = 2.0 * q.i() * q.k();
+		T sj = 2.0 * q.s() * q.j();
+
+		return Matrix<T, 3, 3>(1.0 - jsq - ksq, ij - sk, ik + sj,
+								ij + sk, 1.0 - isq - ksq, jk - si,
+								ik - sj, jk + si, 1.0 - isq - jsq);
 	}
 
 	sml_export using Quatf = Quaternion<float>;
