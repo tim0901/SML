@@ -12,6 +12,8 @@ namespace sml {
 			vector = { static_cast<T>(0) };
 		}
 		template<typename T2>
+		Quaternion(const Quaternion<T2>& q2) : scalar{ static_cast<T>(q2.scalar[0])}, vector{q2.vector} {};
+		template<typename T2>
 		Quaternion(const T2 c) : scalar{ static_cast<T>(c) }, vector{ Vector<T, 3>(static_cast<T>(c),static_cast<T>(c),static_cast<T>(c)) } {};
 		template<typename T2, typename T3>
 		Quaternion(const T2 s, const Vector<T3, 3> v) : scalar{ static_cast<T>(s) }, vector{ v } {};
@@ -97,9 +99,26 @@ namespace sml {
 		inline T j() const { return vector[1]; }
 		inline T k() const { return vector[2]; }
 
+		// Unary operators
+		inline const Quaternion& operator + () const { return *this; }
+		inline Quaternion operator - () const {
+			Quaternion<T> ret = *this;
+			ret.scalar[0] = -scalar[0];
+			ret.vector = -vector;
+			return ret;
+		}
+
 		// Comparison operators
 		inline bool operator == (const Quaternion<T>& q2) const {
 			return ((scalar.at(0) == q2.scalar.at(0)) && (vector == q2.vector));
+		}
+
+		// Assignment operator
+		template<typename T2>
+		inline Quaternion<T>& operator = (const Quaternion<T2>& q2) {
+			scalar[0] = static_cast<T>(q2.scalar[0]);
+			vector = q2.vector;
+			return *this;
 		}
 
 		template<typename T2>
