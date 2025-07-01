@@ -231,19 +231,44 @@ namespace sml {
 	}
 
 	sml_export template<typename T>
-		inline double squared_length(const Quaternion<T>& q) {
+		inline double SquaredLength(const Quaternion<T>& q) {
 		return (q.q0() * q.q0()) + (q.q1() * q.q1()) + (q.q2() * q.q2()) + (q.q3() * q.q3());
 	}
 
 	sml_export template<typename T>
-		inline double length(const Quaternion<T>& q) {
-		return std::sqrt(squared_length(q));
+		inline double Length(const Quaternion<T>& q) {
+		return std::sqrt(SquaredLength(q));
 	}
 
 	sml_export template<typename T>
-		inline Quaternion<T> inverse(const Quaternion<T>& q) {
-		return Conjugate(q) / squared_length(q);
+		inline Quaternion<T> Inverse(const Quaternion<T>& q) {
+		return Conjugate(q) / SquaredLength(q);
 	}
+
+	sml_export template<typename T>
+		inline Quaternion<T> RotationMatrixToQuaternion(sml::Matrix<T, 4, 4> mat) {
+
+		return RotationMatrixToQuaternion(top_left(mat));
+	}
+	sml_export template<typename T>
+		inline Quaternion<T> RotationMatrixToQuaternion(sml::Matrix<T, 3, 3> mat) {
+
+		Quaternion<T> ret(0);
+
+		ret.q0() = std::sqrt(std::max(0.0, 1.0 + mat.at(0, 0) + mat.at(1, 1) + mat.at(2, 2))) / 2;
+		ret.q1() = std::sqrt(std::max(0.0, 1.0 + mat.at(0, 0) - mat.at(1, 1) - mat.at(2, 2))) / 2;
+		ret.q2() = std::sqrt(std::max(0.0, 1.0 - mat.at(0, 0) + mat.at(1, 1) - mat.at(2, 2))) / 2;
+		ret.q3() = std::sqrt(std::max(0.0, 1.0 - mat.at(0, 0) - mat.at(1, 1) + mat.at(2, 2))) / 2;
+
+		ret.i() = std::copysign(ret.i(), mat.at(2, 1) - mat.at(1, 2));
+		ret.j() = std::copysign(ret.j(), mat.at(0, 2) - mat.at(2, 0));
+		ret.k() = std::copysign(ret.k(), mat.at(1, 0) - mat.at(0, 1));
+		
+		return ret;
+	}
+
+	using Quatf = Quaternion<float>;
+	using Quatd = Quaternion<double>;
 }
 
 #endif // SML_QUATERNION_HPP
