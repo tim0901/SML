@@ -109,6 +109,11 @@ namespace sml {
 		template<typename T2>
 		inline Quaternion<T>& operator*= (const T2& t);
 
+		template<typename T2>
+		inline Quaternion<T>& operator/= (const T2& t);
+		template<typename T2>
+		inline Quaternion<T>& operator/= (const Quaternion<T2>& q2);
+
 		std::array<T, 1> scalar;
 		Vector<T, 3> vector;
 
@@ -130,13 +135,13 @@ namespace sml {
 
 	sml_export template<typename T>
 	inline Quaternion<T> Conjugate(const Quaternion<T>& q) {
-		return Quaternion(q.q0(), -q.q1(), -q.q2(), -q.q3());
+		return Quaternion<T>(q.q0(), -q.q1(), -q.q2(), -q.q3());
 	}
 
 	using std::abs;
 	sml_export template<typename T>
 		inline Quaternion<T> abs(const Quaternion<T>& q) {
-		return Quaternion(abs(q.scalar), abs(q.vector));
+		return Quaternion<T>(abs(q.scalar), abs(q.vector));
 	}
 
 	sml_export template<typename T>
@@ -193,13 +198,36 @@ namespace sml {
 		template<typename T2>
 	inline Quaternion<T>& Quaternion<T>::operator*= (const T2& t) {
 
-		scalar[0] *= t;
+		scalar[0] *= static_cast<T>(t);
 		vector *= t;
 		return *this;
 	}
 	sml_export template<typename T, typename T2>
 		inline Quaternion<T> operator* (Quaternion<T> q, const T2& t) {
 		return q *= t;
+	}
+
+	sml_export template<typename T>
+		template<typename T2>
+	inline Quaternion<T>& Quaternion<T>::operator/=(const T2& t) {
+
+		scalar[0] /= static_cast<T>(t);
+		vector /= t;
+		return *this;
+	}
+	sml_export template<typename T, typename T2>
+		inline Quaternion<T> operator/ (Quaternion<T> q, const T2& t) {
+		return q /= t;
+	}
+
+	sml_export template<typename T>
+		template<typename T2>
+	inline Quaternion<T>& Quaternion<T>::operator/=(const Quaternion<T2>& q2) {
+		return *this *= inverse(q2);
+	}
+	sml_export template<typename T, typename T2>
+		inline Quaternion<T> operator/ (Quaternion<T> q, const Quaternion<T2>& q2) {
+		return q /= q2;
 	}
 
 	sml_export template<typename T>
@@ -210,6 +238,11 @@ namespace sml {
 	sml_export template<typename T>
 		inline double length(const Quaternion<T>& q) {
 		return std::sqrt(squared_length(q));
+	}
+
+	sml_export template<typename T>
+		inline Quaternion<T> inverse(const Quaternion<T>& q) {
+		return Conjugate(q) / squared_length(q);
 	}
 }
 
