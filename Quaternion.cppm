@@ -11,9 +11,11 @@ import <algorithm>;
 import <iostream>;
 import <unordered_map>;
 import <vector>;
+import <cassert>;
 
 #else
 import std;
+import <cassert>;
 #endif // SML_NO_IMPORT_STD
 
 import :Vector;

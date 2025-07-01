@@ -306,6 +306,8 @@ namespace sml {
 	sml_export template<typename T>
 		inline Matrix<T, 4, 4> QuaternionTo44RotationMatrix(const Quaternion<T>& q) {
 
+		assert(IsNormal(q));
+
 		T isq = 2.0 * q.i() * q.i();
 		T jsq = 2.0 * q.j() * q.j();
 		T ksq = 2.0 * q.k() * q.k();
@@ -325,6 +327,8 @@ namespace sml {
 
 	sml_export template<typename T>
 		inline Matrix<T, 3, 3> QuaternionTo33RotationMatrix(const Quaternion<T>& q) {
+
+		assert(IsNormal(q));
 
 		T isq = 2.0 * q.i() * q.i();
 		T jsq = 2.0 * q.j() * q.j();
