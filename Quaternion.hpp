@@ -97,6 +97,11 @@ namespace sml {
 		inline T j() const { return vector[1]; }
 		inline T k() const { return vector[2]; }
 
+		// Comparison operators
+		inline bool operator == (const Quaternion<T>& q2) const {
+			return ((scalar.at(0) == q2.scalar.at(0)) && (vector == q2.vector));
+		}
+
 		template<typename T2>
 		inline Quaternion<T>& operator+= (const Quaternion<T2>& q2);
 
@@ -246,6 +251,16 @@ namespace sml {
 	}
 
 	sml_export template<typename T>
+		inline Quaternion<T> Normalise(const Quaternion<T>& q) {
+		return (q / Length(q));
+	}
+
+	sml_export template<typename T>
+		inline bool IsNormal(const Quaternion<T>& q) {
+		return (q == Normalise(q));
+	}
+
+	sml_export template<typename T>
 		inline Quaternion<T> RotationMatrixToQuaternion(sml::Matrix<T, 4, 4> mat) {
 
 		return RotationMatrixToQuaternion(top_left(mat));
@@ -267,8 +282,8 @@ namespace sml {
 		return ret;
 	}
 
-	using Quatf = Quaternion<float>;
-	using Quatd = Quaternion<double>;
+	sml_export using Quatf = Quaternion<float>;
+	sml_export using Quatd = Quaternion<double>;
 }
 
 #endif // SML_QUATERNION_HPP
