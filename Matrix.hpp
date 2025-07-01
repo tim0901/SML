@@ -114,10 +114,10 @@ public:
 	}
 
 	// Comparison operators
-	inline bool operator == (const Matrix<T, nrows, ncols>& m2) {
+	inline bool operator == (const Matrix<T, nrows, ncols>& m2) const {
 		return std::equal(data.begin(), data.end(), m2.begin(), m2.end());
 	}
-	inline bool operator != (const Matrix<T, nrows, ncols>& m2) {
+	inline bool operator != (const Matrix<T, nrows, ncols>& m2) const {
 		return !(*this == m2);
 	}
 
