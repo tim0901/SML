@@ -4,22 +4,22 @@
 namespace sml {
 
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 	class Quaternion {
 	public:
 		Quaternion() {
 			scalar = { static_cast<T>(0) };
 			vector = { static_cast<T>(0) };
 		}
-		template<typename T2>
+		template<arithmetic T2>
 		Quaternion(const Quaternion<T2>& q2) : scalar{ static_cast<T>(q2.scalar[0])}, vector{q2.vector} {};
-		template<typename T2>
+		template<arithmetic T2>
 		Quaternion(const T2 c) : scalar{ static_cast<T>(c) }, vector{ Vector<T, 3>(static_cast<T>(c),static_cast<T>(c),static_cast<T>(c)) } {};
-		template<typename T2, typename T3>
+		template<arithmetic T2, arithmetic T3>
 		Quaternion(const T2 s, const Vector<T3, 3> v) : scalar{ static_cast<T>(s) }, vector{ v } {};
-		template<typename T2, typename T3, typename T4, typename T5>
+		template<arithmetic T2, arithmetic T3, arithmetic T4, arithmetic T5>
 		Quaternion(const T2 s, const T3 v0, const T4 v1, const T5 v2) : scalar{ static_cast<T>(s) }, vector{ Vector<T, 3>(static_cast<T>(v0),static_cast<T>(v1),static_cast<T>(v2)) } {};
-		template<typename T2>
+		template<arithmetic T2>
 		Quaternion(const T2 arr[4]) {
 			scalar[0] = { static_cast<T>(arr[0]) };
 			vector[0] = static_cast<T>(arr[1]);
@@ -114,30 +114,34 @@ namespace sml {
 		inline bool operator == (const Quaternion<T>& q2) const {
 			return ((scalar.at(0) == q2.scalar.at(0)) && (vector == q2.vector));
 		}
+		template<arithmetic T2>
+		inline bool operator == (const Quaternion<T2>& q2) const {
+			return ((scalar.at(0) == q2.scalar.at(0)) && (vector == q2.vector));
+		}
 
 		// Assignment operator
-		template<typename T2>
+		template<arithmetic T2>
 		inline Quaternion<T>& operator = (const Quaternion<T2>& q2) {
 			scalar[0] = static_cast<T>(q2.scalar[0]);
 			vector = q2.vector;
 			return *this;
 		}
 
-		template<typename T2>
+		template<arithmetic T2>
 		inline Quaternion<T>& operator+= (const Quaternion<T2>& q2);
 
-		template<typename T2>
+		template<arithmetic T2>
 		inline Quaternion<T>& operator-= (const Quaternion<T2>& q2);
 
-		template<typename T2>
+		template<arithmetic T2>
 		inline Quaternion<T>& operator*= (const Quaternion<T2>& q2);
 
-		template<typename T2>
+		template<arithmetic T2>
 		inline Quaternion<T>& operator*= (const T2& t);
 
-		template<typename T2>
+		template<arithmetic T2>
 		inline Quaternion<T>& operator/= (const T2& t);
-		template<typename T2>
+		template<arithmetic T2>
 		inline Quaternion<T>& operator/= (const Quaternion<T2>& q2);
 
 		std::array<T, 1> scalar;
@@ -146,56 +150,56 @@ namespace sml {
 	};
 
 	// Write vector to ostream
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 	inline std::ostream& operator << (std::ostream& os, const Quaternion<T>& t) {
 		os << t[0] << " " << t[1] << " " << t[2] << " " << t[3];
 		return os;
 	}
 
 	// Write vector to wostream
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 	inline std::wostream& operator << (std::wostream& os, const Quaternion<T>& t) {
 		os << t[0] << " " << t[1] << " " << t[2] << " " << t[3];
 		return os;
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 	inline Quaternion<T> Conjugate(const Quaternion<T>& q) {
 		return Quaternion<T>(q.q0(), -q.q1(), -q.q2(), -q.q3());
 	}
 
 	using std::abs;
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline Quaternion<T> abs(const Quaternion<T>& q) {
 		return Quaternion<T>(abs(q.scalar), abs(q.vector));
 	}
 
-	sml_export template<typename T>
-		template<typename T2>
+	sml_export template<arithmetic T>
+		template<arithmetic T2>
 		inline Quaternion<T>& Quaternion<T>::operator+= (const Quaternion<T2>& q2) {
 			q0() += static_cast<T>(q2.q0());
 			vector += q2.vector;
 			return *this;
 	}
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 		inline Quaternion<T> operator+ (Quaternion<T> q1, const Quaternion<T2>& q2) {
 		return q1 += q2;
 	}
 
-	sml_export template<typename T>
-		template<typename T2>
+	sml_export template<arithmetic T>
+		template<arithmetic T2>
 	inline Quaternion<T>& Quaternion<T>::operator-= (const Quaternion<T2>& q2) {
 		q0() -= static_cast<T>(q2.q0());
 		vector -= q2.vector;
 		return *this;
 	}
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 		inline Quaternion<T> operator- (Quaternion<T> q1, const Quaternion<T2>& q2) {
 		return q1 -= q2;
 	}
 
-	sml_export template<typename T>
-		template<typename T2>
+	sml_export template<arithmetic T>
+		template<arithmetic T2>
 	inline Quaternion<T>& Quaternion<T>::operator*= (const Quaternion<T2>& q) {
 
 		//(a, b, c, d) * (e, f, g, h);
@@ -215,78 +219,77 @@ namespace sml {
 
 		return *this;
 	}
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 		inline Quaternion<T> operator* (Quaternion<T> q1, const Quaternion<T2>& q2) {
 		return q1 *= q2;
 	}
 
-	sml_export template<typename T>
-		template<typename T2>
+	sml_export template<arithmetic T>
+		template<arithmetic T2>
 	inline Quaternion<T>& Quaternion<T>::operator*= (const T2& t) {
 
 		scalar[0] *= static_cast<T>(t);
 		vector *= t;
 		return *this;
 	}
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 		inline Quaternion<T> operator* (Quaternion<T> q, const T2& t) {
 		return q *= t;
 	}
 
-	sml_export template<typename T>
-		template<typename T2>
+	sml_export template<arithmetic T>
+		template<arithmetic T2>
 	inline Quaternion<T>& Quaternion<T>::operator/=(const T2& t) {
-
 		scalar[0] /= static_cast<T>(t);
 		vector /= t;
 		return *this;
 	}
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 		inline Quaternion<T> operator/ (Quaternion<T> q, const T2& t) {
 		return q /= t;
 	}
 
-	sml_export template<typename T>
-		template<typename T2>
+	sml_export template<arithmetic T>
+		template<arithmetic T2>
 	inline Quaternion<T>& Quaternion<T>::operator/=(const Quaternion<T2>& q2) {
 		return *this *= inverse(q2);
 	}
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 		inline Quaternion<T> operator/ (Quaternion<T> q, const Quaternion<T2>& q2) {
 		return q /= q2;
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline double SquaredLength(const Quaternion<T>& q) {
 		return (q.q0() * q.q0()) + (q.q1() * q.q1()) + (q.q2() * q.q2()) + (q.q3() * q.q3());
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline double Length(const Quaternion<T>& q) {
 		return std::sqrt(SquaredLength(q));
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline Quaternion<T> Inverse(const Quaternion<T>& q) {
 		return Conjugate(q) / SquaredLength(q);
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline Quaternion<T> Normalise(const Quaternion<T>& q) {
 		return (q / Length(q));
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline bool IsNormal(const Quaternion<T>& q) {
 		return (q == Normalise(q));
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline Quaternion<T> RotationMatrixToQuaternion(sml::Matrix<T, 4, 4> mat) {
 
 		return RotationMatrixToQuaternion(top_left(mat));
 	}
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline Quaternion<T> RotationMatrixToQuaternion(sml::Matrix<T, 3, 3> mat) {
 
 		Quaternion<T> ret(0);
@@ -303,7 +306,7 @@ namespace sml {
 		return ret;
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline Matrix<T, 4, 4> QuaternionTo44RotationMatrix(const Quaternion<T>& q) {
 
 		assert(IsNormal(q));
@@ -325,7 +328,7 @@ namespace sml {
 							 0.0, 0.0, 0.0, 1.0);
 	}
 
-	sml_export template<typename T>
+	sml_export template<arithmetic T>
 		inline Matrix<T, 3, 3> QuaternionTo33RotationMatrix(const Quaternion<T>& q) {
 
 		assert(IsNormal(q));
@@ -346,14 +349,14 @@ namespace sml {
 								ik - sj, jk + si, 1.0 - isq - jsq);
 	}
 
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 	inline Vector<T2, 3> RotateActive(const Vector<T2, 3> pos, const Quaternion<T> rot) {
 		Quaternion<T> temp(0, pos);
 		temp = Inverse(rot) * temp * rot;
 		return temp.vector;
 	}
 
-	sml_export template<typename T, typename T2>
+	sml_export template<arithmetic T, arithmetic T2>
 	inline Vector<T2, 3> RotatePassive(const Vector<T2, 3> pos, const Quaternion<T> rot) {
 		Quaternion<T> temp(0, pos);
 		temp = rot * temp * Inverse(rot);

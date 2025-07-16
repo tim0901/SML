@@ -13,11 +13,11 @@ export import <vector>;
 import std;
 #endif // SML_NO_IMPORT_STD
 
-
 #ifndef sml_export
 #define sml_export export
 #endif
 
+import :Utility;
 import :Vector;
 #define SML_MODULE_MATRIX
 #include "Matrix.hpp"

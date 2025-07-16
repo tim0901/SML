@@ -18,23 +18,23 @@
 namespace sml {
 
 // This class uses row-major memory ordering
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 class Matrix {
 public:
 	Matrix() {};
-	template<typename T2>
+	template<arithmetic T2>
 	Matrix(T2 t) {
 		for (size_t i = 0; i < nrows*ncols; i++) {
 			data[i] = static_cast<T>(t);
 		}
 	}
-	template<typename ... T2>
+	template<arithmetic ... T2>
 	Matrix(T2 ...ts) : data{ static_cast<T>(ts)... } {}
-	template<typename T2>
+	template<arithmetic T2>
 	Matrix(const Matrix<T2, nrows, ncols>& m2) {
 		std::transform(m2.begin(), m2.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
 	}
-	template<typename T2>
+	template<arithmetic T2>
 	Matrix(const T2 arr[nrows][ncols]) {
 		for (size_t i = 0; i < nrows; i++) {
 			for (size_t j = 0; j < ncols; j++) {
@@ -42,7 +42,7 @@ public:
 			}
 		}
 	}
-	template<typename T2>
+	template<arithmetic T2>
 	Matrix(const T2 arr[nrows * ncols]) {
 		for (size_t i = 0; i < nrows; i++) {
 			for (size_t j = 0; j < ncols; j++) {
@@ -50,7 +50,7 @@ public:
 			}
 		}
 	}
-	template<typename T2>
+	template<arithmetic T2>
 	Matrix(const std::array<T2, nrows* ncols> arr) {
 		std::transform(arr.begin(), arr.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
 	}
@@ -124,90 +124,90 @@ public:
 	// Arithmetic operators
 
 	// Addition
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator += (const Matrix<T2, nrows, ncols>& m2);
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator += (const T2& t);
 
 	// Subtraction
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator -= (const Matrix<T2, nrows, ncols>& m2);
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator -= (const T2& t);
 
 	// Matrix product
-	template<typename T2, size_t ncols2>
+	template<arithmetic T2, size_t ncols2>
 	inline Matrix<T, nrows, ncols>& operator *= (const Matrix<T2, ncols, ncols2>& m2);
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator *= (const T2& t);
 	
 	// Division
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator /= (const T2& t);
 
 	// Modulus - requires integer operands
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator %= (const Matrix<T2, nrows, ncols>& m2);
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator %= (const T2& t);
 
 	// Assignment operator
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& operator = (const Matrix<T2, nrows, ncols>& m2) {
 		std::transform(m2.begin(), m2.end(), data.begin(), [](T2 t)->T {return static_cast<T>(t); });
 		return *this;
 	}
 
 	// Add a row to each row of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& add_row(const Matrix<T2, 1, ncols>& m2);
 	// Subtract a row from each row of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& sub_row(const Matrix<T2, 1, ncols>& m2);
 	// Multiply each row of a Matrix with a row
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& mul_row(const Matrix<T2, 1, ncols>& m2);
 	// Divide a each row of a Matrix by a row
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& div_row(const Matrix<T2, 1, ncols>& m2);
 
 	// Add a column to each column of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& add_col(const Matrix<T2, nrows, 1>& m2);
 	// Subtract a column from each column of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& sub_col(const Matrix<T2, nrows, 1>& m2);
 	// Multiply each column of a Matrix with a column
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& mul_col(const Matrix<T2, nrows, 1>& m2);
 	// Divide a each column of a Matrix by a column
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& div_col(const Matrix<T2, nrows, 1>& m2);
 
 	// Add a Vector to each row of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& add_row(const Vector<T2, ncols>& v);
 	// Subtract a Vector from each row of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& sub_row(const Vector<T2, ncols>& v);
 	// Multiply each row of a Matrix with a Vector
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& mul_row(const Vector<T2, ncols>& v);
 	// Divide a each row of a Matrix by a Vector
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& div_row(const Vector<T2, ncols>& v);
 
 	// Add a Vector to each column of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& add_col(const Vector<T2, nrows>& v);
 	// Subtract a Vector from each column of a Matrix
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& sub_col(const Vector<T2, nrows>& v);
 	// Multiply each column of a Matrix with a Vector
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& mul_col(const Vector<T2, nrows>& v);
 	// Divide a each column of a Matrix by a Vector
-	template<typename T2>
+	template<arithmetic T2>
 	inline Matrix<T, nrows, ncols>& div_col(const Vector<T2, nrows>& v);
 
 	// C++ container named requirements
@@ -318,8 +318,8 @@ inline std::wostream& operator << (std::wostream& os, const Matrix<T, nrows, nco
 }
 
 // Matrix addition
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator += (const Matrix<T2, nrows, ncols>& m2) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -328,15 +328,15 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator += (const Matr
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator + (Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
 	m1 += m2;
 	return m1;
 }
 
 // Scalar addition
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator += (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -345,20 +345,20 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator += (const T2& 
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator + (Matrix<T, nrows, ncols> m1, const T2& t) {
 	m1 += t;
 	return m1;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator + (const T2& t, Matrix<T, nrows, ncols> m1) {
 	m1 += t;
 	return m1;
 }
 
 // Matrix subtraction
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator -= (const Matrix<T2, nrows, ncols>& m2) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -367,15 +367,15 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator -= (const Matr
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator - (Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
 	m1 -= m2;
 	return m1;
 }
 
 // Scalar subtraction
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator -= (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -384,24 +384,24 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator -= (const T2& 
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator - (Matrix<T, nrows, ncols> m1, const T2& t) {
 	m1 -= t;
 	return m1;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator - (const T2& t, Matrix<T, nrows, ncols> m1) {
 	m1 -= t;
 	return m1;
 }
 
 // Matrix product
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2, size_t ncols2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2, size_t ncols2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator *= (const Matrix<T2, ncols, ncols2>& m2) {
 	return (*this) * m2;
 }
-sml_export template<typename T, size_t outside_rows, size_t inside_dim, size_t outside_cols, typename T2>
+sml_export template<arithmetic T, size_t outside_rows, size_t inside_dim, size_t outside_cols, arithmetic T2>
 inline Matrix<T, outside_rows, outside_cols>& operator * (const Matrix<T, outside_rows, inside_dim>& m1, const Matrix<T2, inside_dim, outside_cols>& m2) {
 	Matrix<T, outside_rows, outside_cols> ret(0);
 	for (int i = 0; i < outside_rows; i++) {
@@ -439,7 +439,7 @@ inline Matrix<T, 4, 4> operator * (const Matrix<T, 4, 4>& m1, const Matrix<T, 4,
 
 // Matrix * Vector / Column Matrix = Column Matrix
 
-sml_export template<typename T, size_t dim, typename T2>
+sml_export template<arithmetic T, size_t dim, arithmetic T2>
 inline Matrix<T, dim, 1>& operator * (const Matrix<T, dim, dim>& m, const Vector<T2, dim>& v) {
 	Matrix<T, dim, 1> ret(0);
 	for (int i = 0; i < dim; i++) {
@@ -503,7 +503,7 @@ inline Matrix<T, 4, 1> operator * (const Matrix<T, 4, 4>& m1, const Vector<T, 4>
 
 // Vector / Row Matrix * Matrix = Row Matrix
 
-sml_export template<typename T, size_t dim, typename T2>
+sml_export template<arithmetic T, size_t dim, arithmetic T2>
 inline Matrix<T, 1, dim>& operator * (const Vector<T2, dim>& v, const Matrix<T, dim, dim>& m) {
 	Matrix<T, 1, dim> ret(0);
 	for (int i = 0; i < dim; i++) {
@@ -554,7 +554,7 @@ inline Matrix<T, 1, 4> operator * (const Vector<T, 4>& v, const Matrix<T, 4, 4>&
 }
 
 // Outer Product - Returns the Matrix multiplication of two Vectors, with the first treated as a 1xm Matrix and the second as an mx1 Matrix.
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 Matrix<T, nrows, ncols> outer_product(const Vector<T, nrows>& v1, const Vector<T2, ncols>& v2) {
 	Matrix<T, nrows, ncols> ret(0);
 	for (size_t i = 0; i < nrows; i++) {
@@ -566,14 +566,14 @@ Matrix<T, nrows, ncols> outer_product(const Vector<T, nrows>& v1, const Vector<T
 }
 
 // Outer Product - Returns the Matrix multiplication of a row Matrix and a column Matrix.
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 Matrix<T, nrows, ncols> outer_product(const Matrix<T, nrows, 1>& m1, const Matrix<T2, 1, ncols>& m2) {
 	return m1 * m2;
 }
 
 // Scalar multiplication
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator *= (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -582,20 +582,20 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator *= (const T2& 
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator * (Matrix<T, nrows, ncols> m1, const T2& t) {
 	m1 *= t;
 	return m1;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator * (const T2& t, Matrix<T, nrows, ncols> m1) {
 	m1 *= t;
 	return m1;
 }
 
 // Scalar division
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator /= (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -604,20 +604,20 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator /= (const T2& 
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator / (Matrix<T, nrows, ncols> m1, const T2& t) {
 	m1 /= t;
 	return m1;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator / (const T2& t, Matrix<T, nrows, ncols> m1) {
 	m1 /= t;
 	return m1;
 }
 
 // Matrix modulus - requires integer operands
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator %= (const Matrix<T2, nrows, ncols>& m2) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -626,15 +626,15 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator %= (const Matr
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator % (Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
 	m1 %= m2;
 	return m1;
 }
 
 // Scalar modulus - requires integer operands
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator %= (const T2& t) {
 	for (int i = 0; i < nrows; i++) {
 		for (int j = 0; j < ncols; j++) {
@@ -643,20 +643,20 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::operator %= (const T2& 
 	}
 	return *this;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator % (Matrix<T, nrows, ncols> m1, const T2& t) {
 	m1 %= t;
 	return m1;
 }
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 inline Matrix<T, nrows, ncols>& operator % (const T2& t, Matrix<T, nrows, ncols> m1) {
 	m1 %= t;
 	return m1;
 }
 
 // Add a row to each row of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_row(const Matrix<T2, 1, ncols>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -666,8 +666,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_row(const Matrix<T2
 	return *this;
 }
 // Subtract a row from each row of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_row(const Matrix<T2, 1, ncols>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -677,8 +677,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_row(const Matrix<T2
 	return *this;
 }
 // Multiply each row of a Matrix with a row
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_row(const Matrix<T2, 1, ncols>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -688,8 +688,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_row(const Matrix<T2
 	return *this;
 }
 // Divide a each row of a Matrix by a row
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_row(const Matrix<T2, 1, ncols>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -700,8 +700,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_row(const Matrix<T2
 }
 
 // Add a column to each column of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_col(const Matrix<T2, nrows, 1>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -711,8 +711,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_col(const Matrix<T2
 	return *this;
 }
 // Subtract a column from each column of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_col(const Matrix<T2, nrows, 1>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -722,8 +722,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_col(const Matrix<T2
 	return *this;
 }
 // Multiply each column of a Matrix with a column
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_col(const Matrix<T2, nrows, 1>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -733,8 +733,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_col(const Matrix<T2
 	return *this;
 }
 // Divide a each column of a Matrix by a column
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_col(const Matrix<T2, nrows, 1>& m2) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -745,8 +745,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_col(const Matrix<T2
 }
 
 // Add a row to each row of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_row(const Vector<T2, ncols>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -756,8 +756,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_row(const Vector<T2
 	return *this;
 }
 // Subtract a row from each row of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_row(const Vector<T2, ncols>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -767,8 +767,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_row(const Vector<T2
 	return *this;
 }
 // Multiply each row of a Matrix with a row
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_row(const Vector<T2, ncols>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -778,8 +778,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_row(const Vector<T2
 	return *this;
 }
 // Divide a each row of a Matrix by a row
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_row(const Vector<T2, ncols>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -790,8 +790,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_row(const Vector<T2
 }
 
 // Add a column to each column of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_col(const Vector<T2, nrows>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -801,8 +801,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::add_col(const Vector<T2
 	return *this;
 }
 // Subtract a column from each column of a Matrix
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_col(const Vector<T2, nrows>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -812,8 +812,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::sub_col(const Vector<T2
 	return *this;
 }
 // Multiply each column of a Matrix with a column
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_col(const Vector<T2, nrows>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -823,8 +823,8 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::mul_col(const Vector<T2
 	return *this;
 }
 // Divide a each column of a Matrix by a column
-sml_export template<typename T, size_t nrows, size_t ncols>
-template<typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
+template<arithmetic T2>
 inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_col(const Vector<T2, nrows>& v) {
 	for (size_t i = 0; i < nrows; i++) {
 		for (size_t j = 0; j < ncols; j++) {
@@ -835,7 +835,7 @@ inline Matrix<T, nrows, ncols>& Matrix<T, nrows, ncols>::div_col(const Vector<T2
 }
 
 // Transpose matrices
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 Matrix<T, nrows, ncols> transpose(const Matrix<T, nrows, ncols>& original) {
 	Matrix<T, ncols, nrows> temp;
 	for (size_t i = 0; i < nrows; i++) {
@@ -847,7 +847,7 @@ Matrix<T, nrows, ncols> transpose(const Matrix<T, nrows, ncols>& original) {
 }
 
 // Dot product 
-sml_export template<typename T, size_t elements>
+sml_export template<arithmetic T, size_t elements>
 double dot(const Matrix<T, 1, elements>& m1, const Matrix<T, elements, 1>& m2) {
 	double ret = 0;
 	for (size_t i = 0; i < elements; i++) {
@@ -855,7 +855,7 @@ double dot(const Matrix<T, 1, elements>& m1, const Matrix<T, elements, 1>& m2) {
 	}
 	return ret;
 }
-sml_export template<typename T, size_t elements>
+sml_export template<arithmetic T, size_t elements>
 double dot(const Matrix<T, elements, 1>& m1, const Matrix<T, 1, elements>& m2) {
 	double ret = 0;
 	for (size_t i = 0; i < elements; i++) {
@@ -863,7 +863,7 @@ double dot(const Matrix<T, elements, 1>& m1, const Matrix<T, 1, elements>& m2) {
 	}
 	return ret;
 }
-sml_export template<typename T, size_t elements>
+sml_export template<arithmetic T, size_t elements>
 double dot(const Matrix<T, elements, 1>& m1, const Matrix<T, elements, 1>& m2) {
 	double ret = 0;
 	for (size_t i = 0; i < elements; i++) {
@@ -871,7 +871,7 @@ double dot(const Matrix<T, elements, 1>& m1, const Matrix<T, elements, 1>& m2) {
 	}
 	return ret;
 }
-sml_export template<typename T, size_t elements>
+sml_export template<arithmetic T, size_t elements>
 double dot(const Matrix<T, 1, elements>& m1, const Matrix<T, 1, elements>& m2) {
 	double ret = 0;
 	for (size_t i = 0; i < elements; i++) {
@@ -881,14 +881,14 @@ double dot(const Matrix<T, 1, elements>& m1, const Matrix<T, 1, elements>& m2) {
 }
 
 // Element-wise matrix multiplication (Hadamard product)
-sml_export template<typename T, size_t nrows, size_t ncols, typename T2>
+sml_export template<arithmetic T, size_t nrows, size_t ncols, arithmetic T2>
 Matrix<T, nrows, ncols> multiply_elements(Matrix<T, nrows, ncols> m1, const Matrix<T2, nrows, ncols>& m2) {
 	std::transform(m1.begin(), m1.end(), m2.begin(), m1.begin(), [](T i, T2 j) -> T {return i * static_cast<T>(j); });
 	return m1;
 }
 
 // Calculate the trace of a matrix
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 T trace(const Matrix<T, dim, dim>& m) {
 	T ret = 0;
 	for (size_t i = 0; i < dim; i++) {
@@ -897,7 +897,7 @@ T trace(const Matrix<T, dim, dim>& m) {
 	return ret;
 }
 
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 std::tuple<Matrix<float, dim, dim>, Vector<size_t, dim + 1>> LUPDecomposition(const Matrix<T, dim, dim>& m) {
 
 	Matrix<float, dim, dim> A;
@@ -955,7 +955,7 @@ std::tuple<Matrix<float, dim, dim>, Vector<size_t, dim + 1>> LUPDecomposition(co
 	return std::make_tuple(A, pivot_matrix);
 }
 
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 float det(const Matrix<T, dim, dim>& m) {
 
 	// Returns the determinant of matrix m from its LUP decomposition
@@ -974,19 +974,19 @@ float det(const Matrix<T, dim, dim>& m) {
 	return (P.at(dim) - dim) % 2 == 0 ? det : -det;
 }
 
-sml_export template<typename T>
+sml_export template<arithmetic T>
 double det(const Matrix<T, 2, 2>& m) {
 	return static_cast<double>((m[0][0] * m[1][1]) - (m[0][1] * m[1][0]));
 }
 
-sml_export template<typename T>
+sml_export template<arithmetic T>
 double det(const Matrix<T, 3, 3>& m) {
 	return static_cast<double>(m[0][0] * ((m[1][1] * m[2][2]) - (m[1][2] * m[2][1]))
 		- m[0][1] * ((m[1][0] * m[2][2]) - (m[1][2] * m[2][0]))
 		+ m[0][2] * ((m[1][0] * m[2][1]) - (m[1][1] * m[2][0])));
 }
 
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 Matrix<T, dim, dim> identity() {
 	Matrix<T, dim, dim> ret(0);
 	for (size_t i = 0; i < dim; i++) {
@@ -995,7 +995,7 @@ Matrix<T, dim, dim> identity() {
 	return ret;
 }
 
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 Matrix<T, nrows, ncols> exchange_columns(Matrix<T, nrows, ncols>& m, const size_t& colA, const size_t& colB) {
 	for (size_t i = 0; i < nrows; i++) {
 		std::swap(m.at(i, colA), m.at(i, colB));
@@ -1003,7 +1003,7 @@ Matrix<T, nrows, ncols> exchange_columns(Matrix<T, nrows, ncols>& m, const size_
 	return m;
 }
 
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 Matrix<T, nrows, ncols> exchange_rows(Matrix<T, nrows, ncols>& m, const size_t& colA, const size_t& colB) {
 	for (size_t i = 0; i < ncols; i++) {
 		std::swap(m.at(colA, i), m.at(colB, i));
@@ -1011,7 +1011,7 @@ Matrix<T, nrows, ncols> exchange_rows(Matrix<T, nrows, ncols>& m, const size_t& 
 	return m;
 }
 
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 Matrix<T, dim, dim> inverse(const Matrix<T, dim, dim>& m) {
 
 	Matrix<T, dim, dim> I = identity<T, dim>();
@@ -1055,7 +1055,7 @@ Matrix<T, dim, dim> inverse(const Matrix<T, dim, dim>& m) {
 
 //Take the absolute value of each component
 using std::abs;
-sml_export template<typename T, size_t nrows, size_t ncols >
+sml_export template<arithmetic T, size_t nrows, size_t ncols >
 Matrix<T, nrows, ncols> abs(Matrix<T, nrows, ncols>& m) {
 	Matrix<T, nrows, ncols> ret = m;
 	for (T& i : ret) {
@@ -1064,37 +1064,37 @@ Matrix<T, nrows, ncols> abs(Matrix<T, nrows, ncols>& m) {
 	return ret;
 }
 
-sml_export template<typename T, size_t rows, size_t cols, typename T2, typename T3>
+sml_export template<arithmetic T, size_t rows, size_t cols, arithmetic T2, arithmetic T3>
 Matrix<T, rows, cols> lerp(const Matrix<T, rows, cols>& m1, const Matrix<T2, rows, cols>& m2, const T3 t) {
 	return (m1 + ((m2 - m1) * static_cast<T>(t)));
 }
 
 // Return the index of the largest element
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 size_t max_element(const Matrix<T, nrows, ncols>& m) {
 	return std::distance(m.begin(), std::max_element(m.begin(), m.end()));
 }
 
 // Return the index of the smallest element
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 size_t min_element(const Matrix<T, nrows, ncols>& m) {
 	return std::distance(m.begin(), std::min_element(m.begin(), m.end()));
 }
 
 // Return the largest element
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 T max(const Matrix<T, nrows, ncols>& m) {
 	return *std::max_element(m.begin(), m.end());
 }
 
 // Return the smallest element
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 T min(const Matrix<T, nrows, ncols>& m) {
 	return *std::min_element(m.begin(), m.end());
 }
 
 // Clamp
-sml_export template<typename T, size_t nrows, size_t ncols>
+sml_export template<arithmetic T, size_t nrows, size_t ncols>
 Matrix<T, nrows, ncols> clamp(const Matrix<T, nrows, ncols>& m, const T& t1, const T& t2) {
 	Matrix<T, nrows, ncols> ret = m; std::transform(ret.begin(), ret.end(), ret.begin(), [t1, t2](T i) -> T {return std::clamp(i, t1, t2); });
 	return ret;
@@ -1123,7 +1123,7 @@ sml_export inline Matrix<float, 4, 4> RotateZ(const float radians) {
 }
 
 // Return the square matrix to the top left that is 1 smaller in each dimension eg a 3x3 from a 4x4
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim >= 2)
 sml::Matrix<T, dim - 1, dim - 1> top_left(const sml::Matrix<T, dim, dim>& m) {
 	sml::Matrix<T, dim - 1, dim - 1> ret(0);
@@ -1134,14 +1134,14 @@ sml::Matrix<T, dim - 1, dim - 1> top_left(const sml::Matrix<T, dim, dim>& m) {
 	}
 	return ret;
 }
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim <= 1)
 T top_left(const sml::Matrix<T, dim, dim>& m) {
 	return m.at(0, 0);
 }
 
 // Return the square matrix to the top right that is 1 smaller in each dimension eg a 3x3 from a 4x4
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim >= 2)
 sml::Matrix<T, dim - 1, dim - 1> top_right(const sml::Matrix<T, dim, dim>& m) {
 	sml::Matrix<T, dim - 1, dim - 1> ret(0);
@@ -1152,14 +1152,14 @@ sml::Matrix<T, dim - 1, dim - 1> top_right(const sml::Matrix<T, dim, dim>& m) {
 	}
 	return ret;
 }
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim <= 1)
 T top_right(const sml::Matrix<T, dim, dim>& m) {
 	return m.at(0, 1);
 }
 
 // Return the square matrix to the bottom left that is 1 smaller in each dimension eg a 3x3 from a 4x4
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim >= 2)
 sml::Matrix<T, dim - 1, dim - 1> bottom_left(const sml::Matrix<T, dim, dim>& m) {
 	sml::Matrix<T, dim - 1, dim - 1> ret(0);
@@ -1171,14 +1171,14 @@ sml::Matrix<T, dim - 1, dim - 1> bottom_left(const sml::Matrix<T, dim, dim>& m) 
 	return ret;
 }
 
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim <= 1)
 T bottom_left(const sml::Matrix<T, dim, dim>& m) {
 	return m.at(1, 0);
 }
 
 // Return the square matrix to the bottom right that is 1 smaller in each dimension eg a 3x3 from a 4x4
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim >= 2)
 sml::Matrix<T, dim - 1, dim - 1> bottom_right(const sml::Matrix<T, dim, dim>& m) {
 	sml::Matrix<T, dim - 1, dim - 1> ret(0);
@@ -1189,7 +1189,7 @@ sml::Matrix<T, dim - 1, dim - 1> bottom_right(const sml::Matrix<T, dim, dim>& m)
 	}
 	return ret;
 }
-sml_export template<typename T, size_t dim>
+sml_export template<arithmetic T, size_t dim>
 	requires (dim <= 1)
 T bottom_right(const sml::Matrix<T, dim, dim>& m) {
 	return m.at(1, 1);

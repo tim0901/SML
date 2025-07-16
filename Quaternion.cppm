@@ -17,7 +17,7 @@ import <cassert>;
 import std;
 import <cassert>;
 #endif // SML_NO_IMPORT_STD
-
+import :Utility;
 import :Vector;
 import :Matrix;
 #define SML_MODULE_VECTOR

@@ -12,7 +12,7 @@ import <vector>;
 import std;
 #endif // SML_NO_IMPORT_STD
 
-
+import :Utility;
 
 #ifndef sml_export
 #define sml_export export
